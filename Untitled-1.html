@@ -1,899 +1,481 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Farm Poultry Dashboard</title>
-  <!-- Tailwind CSS CDN for styling -->
+  <title>Poultry Hub - Modern Farm Management Made Simple</title>
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0fdf4',
+              100: '#dcfce7',
+              500: '#22c55e',
+              600: '#16a34a',
+              700: '#15803d',
+              800: '#166534',
+              900: '#14532d',
+            }
+          }
+        }
+      }
+    }
+  </script>
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+<body class="bg-black text-slate-100 font-sans antialiased selection:bg-emerald-500 selection:text-black">
 
-  <!-- Sidebar Navigation -->
-  <aside class="w-full md:w-64 bg-emerald-900 text-white flex-shrink-0 flex flex-col justify-between">
-    <div>
-      <div class="p-5 border-b border-emerald-800 flex items-center space-x-3">
-        <i data-lucide="egg" class="w-8 h-8 text-amber-400"></i>
-        <div>
-          <h1 class="font-bold text-lg leading-tight" id="nav-farm-name">Poultry Hub</h1>
-          <p class="text-xs text-emerald-300">Management Dashboard</p>
+  <!-- Header / Navigation -->
+  <header class="fixed top-0 left-0 right-0 z-40 bg-black/80 backdrop-blur-md border-b border-neutral-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="#" class="flex items-center space-x-3 group">
+        <div class="p-2 bg-emerald-950/80 border border-emerald-800/60 rounded-xl group-hover:border-emerald-500 transition-colors">
+          <i data-lucide="egg" class="w-6 h-6 text-amber-400"></i>
         </div>
-      </div>
-      <nav class="p-3 space-y-1 text-sm font-medium">
-        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg bg-emerald-800 text-white">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span>
-        </button>
-        <button onclick="switchTab('flock')" id="btn-flock" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="bird" class="w-5 h-5"></i><span>Flock Management</span>
-        </button>
-        <button onclick="switchTab('egg')" id="btn-egg" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="egg" class="w-5 h-5"></i><span>Egg Production</span>
-        </button>
-        <button onclick="switchTab('sales')" id="btn-sales" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Sales Management</span>
-        </button>
-        <button onclick="switchTab('feed')" id="btn-feed" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="wheat" class="w-5 h-5"></i><span>Feed Management</span>
-        </button>
-        <button onclick="switchTab('treatment')" id="btn-treatment" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="syringe" class="w-5 h-5"></i><span>Treatment Schedule</span>
-        </button>
-        <button onclick="switchTab('finance')" id="btn-finance" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span>Financial Tracking</span>
-        </button>
-        <button onclick="switchTab('activity')" id="btn-activity" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="calendar" class="w-5 h-5"></i><span>Activity Scheduler</span>
-        </button>
-        <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="user" class="w-5 h-5"></i><span>Farm Profile</span>
-        </button>
+        <div>
+          <span class="font-extrabold text-xl tracking-tight text-white block leading-none">Poultry Hub</span>
+          <span class="text-[10px] uppercase tracking-widest text-emerald-400 font-semibold">Farm OS</span>
+        </div>
+      </a>
+
+      <!-- Navigation Links -->
+      <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+        <a href="#features" class="hover:text-emerald-400 transition-colors">Features</a>
+        <a href="#modules" class="hover:text-emerald-400 transition-colors">Modules</a>
+        <a href="#pricing" class="hover:text-emerald-400 transition-colors">Pricing</a>
+        <a href="#testimonials" class="hover:text-emerald-400 transition-colors">Testimonials</a>
       </nav>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-3">
+        <button onclick="openAuthModal('signin')" class="text-sm font-semibold text-slate-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors">
+          Sign In
+        </button>
+        <button onclick="openAuthModal('signup')" class="text-sm font-semibold bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-xl transition-all shadow-lg shadow-emerald-950/50 hover:shadow-emerald-900/50 flex items-center space-x-2">
+          <span>Get Started</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </div>
+
     </div>
-    <div class="p-4 border-t border-emerald-800 text-xs text-emerald-300">
-      <p>Today: <span id="current-date-display" class="font-semibold text-white"></span></p>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="relative pt-36 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+    <!-- Background Glow Effects -->
+    <div class="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-emerald-600/20 blur-[140px] rounded-full pointer-events-none"></div>
+    <div class="absolute top-1/3 left-1/3 w-[300px] h-[200px] bg-amber-500/10 blur-[100px] rounded-full pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      
+      <!-- Pill Badge -->
+      <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-medium text-emerald-400 mb-8">
+        <span class="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Built for Modern Commercial Poultry Farms</span>
+      </div>
+
+      <!-- Main Headline -->
+      <h1 class="text-4xl sm:text-6xl lg:text-7xl font-extrabold text-white tracking-tight leading-[1.1] max-w-4xl mx-auto">
+        Maximize Flock Yield & Streamline Your <span class="bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300 bg-clip-text text-transparent">Poultry Business</span>
+      </h1>
+
+      <!-- Subtitle -->
+      <p class="mt-6 text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto font-normal leading-relaxed">
+        Track batch ages, egg production quotas, feed consumption, automated medical schedules, and sales revenue in one integrated, real-time dashboard.
+      </p>
+
+      <!-- CTA Buttons -->
+      <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <button onclick="openAuthModal('signup')" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base transition-all shadow-xl shadow-emerald-950/60 flex items-center justify-center space-x-2">
+          <span>Start Your Free Trial</span>
+          <i data-lucide="chevron-right" class="w-5 h-5"></i>
+        </button>
+        <a href="poultry-dashboard 45.html" class="w-full sm:w-auto px-8 py-4 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-slate-200 border border-neutral-800 font-semibold text-base transition-all flex items-center justify-center space-x-2">
+          <i data-lucide="layout-dashboard" class="w-5 h-5 text-emerald-400"></i>
+          <span>Launch Live Demo</span>
+        </a>
+      </div>
+
+      <!-- Quick Stats Banner -->
+      <div class="mt-16 pt-10 border-t border-neutral-800/80 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+        <div>
+          <p class="text-3xl font-extrabold text-white">99.4%</p>
+          <p class="text-xs text-slate-400 uppercase tracking-wider mt-1 font-medium">Batch Tracking Accuracy</p>
+        </div>
+        <div>
+          <p class="text-3xl font-extrabold text-emerald-400">30%</p>
+          <p class="text-xs text-slate-400 uppercase tracking-wider mt-1 font-medium">Reduced Feed Waste</p>
+        </div>
+        <div>
+          <p class="text-3xl font-extrabold text-amber-400">100%</p>
+          <p class="text-xs text-slate-400 uppercase tracking-wider mt-1 font-medium">Vaccination Compliance</p>
+        </div>
+        <div>
+          <p class="text-3xl font-extrabold text-white">10k+</p>
+          <p class="text-xs text-slate-400 uppercase tracking-wider mt-1 font-medium">Birds Managed Daily</p>
+        </div>
+      </div>
+
     </div>
-  </aside>
+  </section>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl">
+  <!-- Interactive Dashboard Preview Mockup -->
+  <section class="py-12 bg-black border-y border-neutral-900">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="relative rounded-2xl bg-neutral-900 border border-neutral-800 p-3 sm:p-6 shadow-2xl overflow-hidden group">
+        <!-- Window Controls -->
+        <div class="flex items-center space-x-2 mb-4 pb-3 border-b border-neutral-800">
+          <div class="w-3 h-3 rounded-full bg-rose-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-amber-500/80"></div>
+          <div class="w-3 h-3 rounded-full bg-emerald-500/80"></div>
+          <span class="text-xs text-slate-500 ml-2 font-mono">poultry-hub-dashboard.internal</span>
+        </div>
 
-    <!-- 3.1 Dashboard Home -->
-    <section id="view-dashboard" class="space-y-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <h2 class="text-2xl font-bold text-slate-800">Dashboard Overview</h2>
-        <span class="text-sm bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full font-medium" id="dash-flock-age-tag">Flock Age: -</span>
+        <!-- Simulated Dashboard Frame -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 opacity-90 group-hover:opacity-100 transition-opacity">
+          <div class="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+            <span class="text-xs text-slate-400 uppercase">Active Flock Count</span>
+            <p class="text-2xl font-bold text-white mt-1">700 Birds</p>
+            <span class="text-[11px] text-emerald-400">2 Batches Active</span>
+          </div>
+          <div class="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+            <span class="text-xs text-slate-400 uppercase">Today's Production</span>
+            <p class="text-2xl font-bold text-amber-400 mt-1">380 / 400 Eggs</p>
+            <span class="text-[11px] text-amber-400">95.0% Quota Rate</span>
+          </div>
+          <div class="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+            <span class="text-xs text-slate-400 uppercase">Feed Inventory</span>
+            <p class="text-2xl font-bold text-white mt-1">450 kg</p>
+            <span class="text-[11px] text-emerald-400">Stock Healthy</span>
+          </div>
+          <div class="bg-neutral-950 p-4 rounded-xl border border-neutral-800">
+            <span class="text-xs text-slate-400 uppercase">Today's Revenue</span>
+            <p class="text-2xl font-bold text-emerald-400 mt-1">8,000 KES</p>
+            <span class="text-[11px] text-slate-400">10 Crates Sold</span>
+          </div>
+        </div>
+
+        <!-- Call to action overlay on hover -->
+        <div class="mt-6 p-4 rounded-xl bg-emerald-950/40 border border-emerald-800/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="sparkles" class="w-6 h-6 text-amber-400"></i>
+            <p class="text-sm font-medium text-slate-200">Test drive the complete system with pre-loaded mock data right now.</p>
+          </div>
+          <a href="poultry-dashboard 45.html" class="px-5 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold whitespace-nowrap">
+            Open Interactive App
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Modules Grid Section -->
+  <section id="modules" class="py-24 bg-neutral-950">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase font-bold text-emerald-400 tracking-widest mb-2">Comprehensive Features</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white">Everything You Need to Run Your Farm</p>
+        <p class="text-slate-400 mt-3">Tailored specifically for poultry management: layers, broilers, and chicks.</p>
       </div>
 
-      <!-- Quick Metrics Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-          <div>
-            <p class="text-xs uppercase font-semibold text-slate-500">Current Flock Count</p>
-            <h3 class="text-2xl font-extrabold text-slate-800 mt-1" id="dash-flock-count">0</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        
+        <!-- Feature 1 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-emerald-950/80 border border-emerald-800/50 w-fit rounded-xl text-emerald-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="bird" class="w-6 h-6"></i>
           </div>
-          <div class="bg-emerald-100 p-3 rounded-lg text-emerald-700"><i data-lucide="bird"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">Multi-Batch Flock Tracking</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Monitor multiple flocks separately with individual arrival dates, exact bird age calculation, and mortality logging.
+          </p>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-          <div>
-            <p class="text-xs uppercase font-semibold text-slate-500">Today's Egg Production</p>
-            <h3 class="text-2xl font-extrabold text-slate-800 mt-1"><span id="dash-egg-actual">0</span> / <span id="dash-egg-quota" class="text-base text-slate-400">0</span></h3>
-            <p class="text-xs font-semibold text-amber-600 mt-0.5" id="dash-egg-rate">0% Rate</p>
+
+        <!-- Feature 2 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-amber-950/80 border border-amber-800/50 w-fit rounded-xl text-amber-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="egg" class="w-6 h-6"></i>
           </div>
-          <div class="bg-amber-100 p-3 rounded-lg text-amber-700"><i data-lucide="egg"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">Egg Production & Quotas</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Set custom daily target quotas, log actual collection, and calculate lay rates instantly with visual trend graphs.
+          </p>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-          <div>
-            <p class="text-xs uppercase font-semibold text-slate-500">Today's Crates Sold</p>
-            <h3 class="text-2xl font-extrabold text-slate-800 mt-1" id="dash-crates-sold">0</h3>
+
+        <!-- Feature 3 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-blue-950/80 border border-blue-800/50 w-fit rounded-xl text-blue-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="syringe" class="w-6 h-6"></i>
           </div>
-          <div class="bg-blue-100 p-3 rounded-lg text-blue-700"><i data-lucide="shopping-cart"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">Automated Treatment Schedule</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Pre-loaded with standard vaccination programs from day-old chick to point-of-lay with status logs per batch[cite: 1].
+          </p>
         </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex justify-between items-center">
-          <div>
-            <p class="text-xs uppercase font-semibold text-slate-500">Feed Inventory</p>
-            <h3 class="text-2xl font-extrabold text-slate-800 mt-1" id="dash-feed-inv">0 kg</h3>
-            <p class="text-xs text-slate-500 mt-0.5" id="dash-feed-alert"></p>
+
+        <!-- Feature 4 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-lime-950/80 border border-lime-800/50 w-fit rounded-xl text-lime-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="wheat" class="w-6 h-6"></i>
           </div>
-          <div class="bg-lime-100 p-3 rounded-lg text-lime-700"><i data-lucide="wheat"></i></div>
+          <h3 class="text-xl font-bold text-white mb-2">Feed Inventory Control</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Track purchases against daily consumption with built-in automated low-stock warnings to avoid feed run-outs[cite: 1].
+          </p>
         </div>
+
+        <!-- Feature 5 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-purple-950/80 border border-purple-800/50 w-fit rounded-xl text-purple-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="circle-dollar-sign" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Financial Accounting</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Record revenue and expense transactions with automated crate sales calculations and cumulative net profit graphs[cite: 1].
+          </p>
+        </div>
+
+        <!-- Feature 6 -->
+        <div class="p-6 rounded-2xl bg-black border border-neutral-800 hover:border-emerald-600/50 transition-all group">
+          <div class="p-3 bg-rose-950/80 border border-rose-800/50 w-fit rounded-xl text-rose-400 mb-5 group-hover:scale-110 transition-transform">
+            <i data-lucide="calendar" class="w-6 h-6"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-2">Activity Planner</h3>
+          <p class="text-sm text-slate-400 leading-relaxed">
+            Schedule farm routines, coop sanitation, and labor task assignments with integrated upcoming reminders[cite: 1].
+          </p>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-24 bg-black">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-3xl mx-auto mb-16">
+        <h2 class="text-xs uppercase font-bold text-emerald-400 tracking-widest mb-2">Simple Pricing</h2>
+        <p class="text-3xl sm:text-4xl font-extrabold text-white">Transparent Plans for Every Scale</p>
+        <p class="text-slate-400 mt-3">Start with our free tier or unlock advanced analytics for larger commercial farms.</p>
       </div>
 
-      <!-- Financial Quick Summary -->
-      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+        
+        <!-- Plan 1 -->
+        <div class="bg-neutral-950 p-8 rounded-2xl border border-neutral-800 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-white">Starter Farm</h3>
+            <p class="text-xs text-slate-400 mt-1">For small family or backyard farms</p>
+            <div class="mt-6 mb-6">
+              <span class="text-4xl font-extrabold text-white">Free</span>
+              <span class="text-xs text-slate-400">/ forever</span>
+            </div>
+            <ul class="space-y-3 text-sm text-slate-300 border-t border-neutral-800 pt-6">
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Up to 1 Flock Batch</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Basic Egg Collection Logging</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Standard Vaccination Presets</span></li>
+            </ul>
+          </div>
+          <button onclick="openAuthModal('signup')" class="mt-8 w-full py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-semibold text-sm transition-colors">
+            Get Started Free
+          </button>
+        </div>
+
+        <!-- Plan 2 (Highlighted) -->
+        <div class="bg-neutral-900 p-8 rounded-2xl border-2 border-emerald-500 relative flex flex-col justify-between shadow-2xl shadow-emerald-950/40">
+          <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-emerald-500 text-black text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
+            Most Popular
+          </div>
+          <div>
+            <h3 class="text-xl font-bold text-white">Commercial Producer</h3>
+            <p class="text-xs text-slate-400 mt-1">For growing commercial poultry units</p>
+            <div class="mt-6 mb-6">
+              <span class="text-4xl font-extrabold text-white">$29</span>
+              <span class="text-xs text-slate-400">/ month</span>
+            </div>
+            <ul class="space-y-3 text-sm text-slate-200 border-t border-neutral-800 pt-6">
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Unlimited Flock Batches</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Complete Financial Ledger & Charts</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Feed Inventory Alert System</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Export Reports to PDF/Excel</span></li>
+            </ul>
+          </div>
+          <button onclick="openAuthModal('signup')" class="mt-8 w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm transition-colors shadow-lg shadow-emerald-950/60">
+            Start 14-Day Free Trial
+          </button>
+        </div>
+
+        <!-- Plan 3 -->
+        <div class="bg-neutral-950 p-8 rounded-2xl border border-neutral-800 flex flex-col justify-between">
+          <div>
+            <h3 class="text-xl font-bold text-white">Enterprise / Cooperative</h3>
+            <p class="text-xs text-slate-400 mt-1">Multi-site & co-op poultry networks</p>
+            <div class="mt-6 mb-6">
+              <span class="text-4xl font-extrabold text-white">$89</span>
+              <span class="text-xs text-slate-400">/ month</span>
+            </div>
+            <ul class="space-y-3 text-sm text-slate-300 border-t border-neutral-800 pt-6">
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Multi-Farm Site Dashboard</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Custom API & Vet Integrations</span></li>
+              <li class="flex items-center space-x-2"><i data-lucide="check" class="w-4 h-4 text-emerald-400"></i><span>Dedicated Farm Support Specialist</span></li>
+            </ul>
+          </div>
+          <button onclick="openAuthModal('signup')" class="mt-8 w-full py-3 rounded-xl bg-neutral-800 hover:bg-neutral-700 text-white font-semibold text-sm transition-colors">
+            Contact Sales
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Banner -->
+  <section class="py-20 bg-gradient-to-b from-neutral-950 to-black border-t border-neutral-900">
+    <div class="max-w-5xl mx-auto px-4 text-center">
+      <h2 class="text-3xl sm:text-5xl font-extrabold text-white tracking-tight">Ready to Take Control of Your Poultry Yields?</h2>
+      <p class="text-slate-400 mt-4 max-w-xl mx-auto">Join hundreds of poultry managers taking the guesswork out of flock management today.</p>
+      <div class="mt-8 flex justify-center gap-4">
+        <button onclick="openAuthModal('signup')" class="px-8 py-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-base transition-all shadow-xl shadow-emerald-950/60">
+          Create Free Account
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="border-t border-neutral-900 bg-black py-12 text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
+      <div class="flex items-center space-x-2">
+        <i data-lucide="egg" class="w-5 h-5 text-amber-400"></i>
+        <span class="font-bold text-slate-300">Poultry Hub Management OS</span>
+      </div>
+      <p>&copy; 2026 Poultry Hub Systems. All rights reserved.</p>
+    </div>
+  </footer>
+
+
+  <!-- AUTH MODAL (SIGN IN / SIGN UP) -->
+  <div id="auth-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm hidden">
+    <div class="bg-neutral-900 border border-neutral-800 rounded-2xl w-full max-w-md p-6 sm:p-8 relative shadow-2xl">
+      
+      <!-- Close Button -->
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white p-1">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <!-- Modal Tabs Header -->
+      <div class="flex border-b border-neutral-800 mb-6">
+        <button id="tab-signin" onclick="switchAuthTab('signin')" class="flex-1 py-3 text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 transition-colors">
+          Sign In
+        </button>
+        <button id="tab-signup" onclick="switchAuthTab('signup')" class="flex-1 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors">
+          Create Account
+        </button>
+      </div>
+
+      <!-- Sign In Form -->
+      <form id="form-signin" onsubmit="handleAuthSubmit(event)" class="space-y-4">
         <div>
-          <span class="text-xs font-semibold text-slate-500 uppercase">Today's Revenue</span>
-          <p class="text-xl font-bold text-emerald-600" id="dash-today-rev">0 KES</p>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Email Address</label>
+          <input type="email" required placeholder="farmer@example.com" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
         <div>
-          <span class="text-xs font-semibold text-slate-500 uppercase">Today's Expenses</span>
-          <p class="text-xl font-bold text-rose-600" id="dash-today-exp">0 KES</p>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <label class="flex items-center space-x-2 text-slate-400">
+            <input type="checkbox" class="rounded bg-neutral-800 border-neutral-700 text-emerald-500">
+            <span>Remember me</span>
+          </label>
+          <a href="#" class="text-emerald-400 hover:underline">Forgot Password?</a>
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/50">
+          Sign In to Dashboard
+        </button>
+      </form>
+
+      <!-- Sign Up Form -->
+      <form id="form-signup" onsubmit="handleAuthSubmit(event)" class="space-y-4 hidden">
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Farm / Full Name</label>
+          <input type="text" required placeholder="Green Valley Poultry Farm" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
         <div>
-          <span class="text-xs font-semibold text-slate-500 uppercase">Net Profit / Loss</span>
-          <p class="text-xl font-bold" id="dash-today-net">0 KES</p>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Email Address</label>
+          <input type="email" required placeholder="farmer@example.com" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
-      </div>
+        <div>
+          <label class="block text-xs font-semibold uppercase text-slate-400 mb-1">Password</label>
+          <input type="password" required placeholder="••••••••" class="w-full bg-neutral-800 border border-neutral-700 rounded-xl p-3 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+        <button type="submit" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-sm transition-all shadow-lg shadow-emerald-950/50">
+          Create Farm Account
+        </button>
+      </form>
 
-      <!-- Upcoming Activities & Treatments -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-3 flex items-center space-x-2">
-            <i data-lucide="calendar" class="w-5 h-5 text-emerald-700"></i>
-            <span>Upcoming Activities (Next 7 Days)</span>
-          </h3>
-          <ul class="divide-y divide-slate-100 text-sm" id="dash-upcoming-activities"></ul>
-        </div>
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-3 flex items-center space-x-2">
-            <i data-lucide="syringe" class="w-5 h-5 text-emerald-700"></i>
-            <span>Upcoming Treatments</span>
-          </h3>
-          <ul class="divide-y divide-slate-100 text-sm" id="dash-upcoming-treatments"></ul>
-        </div>
-      </div>
-    </section>
+      <p class="text-xs text-center text-slate-500 mt-6">
+        By continuing, you agree to Poultry Hub's Terms of Service and Privacy Policy.
+      </p>
 
-    <!-- 3.2 Farm Profile -->
-    <section id="view-profile" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Farm Profile</h2>
-      <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm max-w-2xl">
-        <form id="form-profile" onsubmit="saveProfile(event)" class="space-y-4">
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Farm Name</label>
-            <input type="text" id="prof-name" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Location</label>
-            <input type="text" id="prof-location" required class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-          </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Farm Size (e.g. Acres/Sqm)</label>
-              <input type="text" id="prof-size" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Establishment Date</label>
-              <input type="date" id="prof-est-date" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-            </div>
-          </div>
-          <div>
-            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Contact Information</label>
-            <input type="text" id="prof-contact" class="w-full border border-slate-300 rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
-          </div>
-          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-5 py-2.5 rounded-lg text-sm">Save Profile</button>
-        </form>
-      </div>
-    </section>
-
-    <!-- 3.3 Activity Scheduler -->
-    <section id="view-activity" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Activity Scheduler</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-800 mb-4">Schedule Activity</h3>
-          <form id="form-activity" onsubmit="addActivity(event)" class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Title</label>
-              <input type="text" id="act-title" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Description</label>
-              <textarea id="act-desc" rows="2" class="w-full border border-slate-300 rounded-lg p-2 text-sm"></textarea>
-            </div>
-            <div class="grid grid-cols-2 gap-2">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-                <input type="date" id="act-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Time</label>
-                <input type="time" id="act-time" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-            </div>
-            <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 rounded-lg text-sm mt-2">Add Activity</button>
-          </form>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Scheduled Activities</h3>
-          <ul id="activity-list" class="space-y-3"></ul>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.4 Flock Management -->
-    <section id="view-flock" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Flock Management</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4">Set Flock Arrival</h3>
-            <form id="form-flock" onsubmit="saveFlock(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Initial Count</label>
-                <input type="number" id="flock-count-input" min="1" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Arrival Date</label>
-                <input type="date" id="flock-arrival-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 rounded-lg text-sm">Set Flock</button>
-            </form>
-          </div>
-
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-4">Record Mortality / Reduction</h3>
-            <form id="form-mortality" onsubmit="recordMortality(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Number of Birds</label>
-                <input type="number" id="mort-count" min="1" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Reason</label>
-                <input type="text" id="mort-reason" placeholder="e.g. Illness, culling" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-                <input type="date" id="mort-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 rounded-lg text-sm">Record Mortality</button>
-            </form>
-          </div>
-        </div>
-
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-slate-800">Flock Overview & Logs</h3>
-            <button onclick="confirmResetFlock()" class="text-xs text-rose-600 hover:underline">Reset Flock</button>
-          </div>
-          <div class="grid grid-cols-2 gap-4 mb-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <div>
-              <p class="text-xs text-slate-500 font-medium">CURRENT FLOCK COUNT</p>
-              <p class="text-2xl font-bold text-emerald-800" id="flock-detail-count">0</p>
-            </div>
-            <div>
-              <p class="text-xs text-slate-500 font-medium">CALCULATED AGE</p>
-              <p class="text-2xl font-bold text-emerald-800" id="flock-detail-age">-</p>
-            </div>
-          </div>
-          <h4 class="font-semibold text-slate-700 text-sm mb-2">Mortality & Change History</h4>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Date</th><th class="p-2">Birds Removed</th><th class="p-2">Reason</th></tr>
-              </thead>
-              <tbody id="mortality-history" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.5 Egg Production Tracking -->
-    <section id="view-egg" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Egg Production Tracking</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-3">Daily Quota Setting</h3>
-            <form onsubmit="saveEggQuota(event)" class="flex gap-2">
-              <input type="number" id="egg-quota-input" required class="w-full border border-slate-300 rounded-lg p-2 text-sm" placeholder="e.g. 400">
-              <button type="submit" class="bg-emerald-700 text-white px-4 rounded-lg text-sm font-medium">Save</button>
-            </form>
-          </div>
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-3">Record Daily Production</h3>
-            <form onsubmit="addEggProduction(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Actual Eggs Collected</label>
-                <input type="number" id="egg-actual-input" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-                <input type="date" id="egg-date-input" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Production</button>
-            </form>
-          </div>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Production History</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Date</th><th class="p-2">Actual Eggs</th><th class="p-2">Quota</th><th class="p-2">Production Rate</th></tr>
-              </thead>
-              <tbody id="egg-history" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.6 Sales Management -->
-    <section id="view-sales" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Sales Management</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-800 mb-3">Record Crate Sales</h3>
-          <form onsubmit="addSale(event)" class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Crates Sold</label>
-              <input type="number" id="sale-crates" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Price Per Crate (KES)</label>
-              <input type="number" id="sale-price" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-              <input type="date" id="sale-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Sale Entry</button>
-          </form>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Sales Log</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Date</th><th class="p-2">Crates</th><th class="p-2">Price/Crate</th><th class="p-2">Total Revenue</th></tr>
-              </thead>
-              <tbody id="sales-history" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.7 Feed Management -->
-    <section id="view-feed" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Feed Management</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-3">Add Purchased Feed</h3>
-            <form onsubmit="addFeedPurchase(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Feed Type</label>
-                <input type="text" id="feed-p-type" placeholder="e.g. Layers Mash" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Quantity (kg)</label>
-                <input type="number" id="feed-p-qty" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-                <input type="date" id="feed-p-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Purchase</button>
-            </form>
-          </div>
-          <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-slate-800 mb-3">Record Daily Consumption</h3>
-            <form onsubmit="addFeedConsumption(event)" class="space-y-3">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Quantity Consumed (kg)</label>
-                <input type="number" id="feed-c-qty" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-                <input type="date" id="feed-c-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-              </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Consumption</button>
-            </form>
-          </div>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Feed Logs</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Change (kg)</th><th class="p-2">Details</th></tr>
-              </thead>
-              <tbody id="feed-history" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.8 Treatment Scheduling -->
-    <section id="view-treatment" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Treatment Scheduling</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-800 mb-3">Create Treatment Plan</h3>
-          <form onsubmit="addTreatmentPlan(event)" class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Treatment Name</label>
-              <input type="text" id="treat-name" placeholder="e.g. Newcastle Vaccine" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Type</label>
-              <select id="treat-type" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-                <option value="Vaccination">Vaccination</option>
-                <option value="Medication">Medication</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Recommended Age (Days)</label>
-              <input type="number" id="treat-age" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Plan</button>
-          </form>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Treatment Schedule & Log</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Treatment</th><th class="p-2">Target Age</th><th class="p-2">Due Date</th><th class="p-2">Status</th><th class="p-2">Action</th></tr>
-              </thead>
-              <tbody id="treatment-list" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- 3.9 Financial Tracking -->
-    <section id="view-finance" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-800">Financial Tracking</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-800 mb-3">Record Transaction</h3>
-          <form onsubmit="addTransaction(event)" class="space-y-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Type</label>
-              <select id="fin-type" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-                <option value="Revenue">Revenue</option>
-                <option value="Expense">Expense</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Category / Source</label>
-              <input type="text" id="fin-cat" placeholder="e.g. Feed, Medication, Eggs" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Amount (KES)</label>
-              <input type="number" id="fin-amount" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Date</label>
-              <input type="date" id="fin-date" required class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Description</label>
-              <input type="text" id="fin-desc" class="w-full border border-slate-300 rounded-lg p-2 text-sm">
-            </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Transaction</button>
-          </form>
-        </div>
-        <div class="lg:col-span-2 bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-          <h3 class="font-bold text-slate-800 mb-4">Financial Ledger</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-600">
-              <thead class="bg-slate-100 uppercase text-slate-500">
-                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Category</th><th class="p-2">Amount (KES)</th><th class="p-2">Description</th></tr>
-              </thead>
-              <tbody id="finance-history" class="divide-y divide-slate-100"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </section>
-
-  </main>
+    </div>
+  </div>
 
   <!-- JavaScript App Logic -->
   <script>
-    // Initialize today's date format (YYYY-MM-DD)
-    const todayStr = new Date().toISOString().split('T')[0];
+    // Initialize Lucide Icons
+    lucide.createIcons();
 
-    // Local Storage Data Store Initialization
-    const defaultData = {
-      profile: { name: "Green Valley Farm", location: "Nairobi", size: "5 Acres", estDate: "2024-01-15", contact: "+254 700 000 000" },
-      flock: { initialCount: 500, arrivalDate: "2026-09-01", mortalities: [] },
-      activities: [
-        { id: '1', title: 'Clean coops', desc: 'Disinfect coop B', date: '2026-09-10', time: '08:00', completed: false }
-      ],
-      egg: { quota: 400, history: [{ date: todayStr, actual: 380 }] },
-      sales: [{ id: '1', date: todayStr, crates: 10, price: 800 }],
-      feed: {
-        inventory: [
-          { date: '2026-09-01', type: 'Layers Mash', qty: 500, mode: 'purchase' },
-          { date: todayStr, type: 'Layers Mash', qty: 50, mode: 'consumed' }
-        ]
-      },
-      treatments: [
-        { id: '1', name: 'Newcastle Disease Vaccine', type: 'Vaccination', ageDays: 14, completed: false, completedDate: null }
-      ],
-      finance: [
-        { id: '1', date: todayStr, type: 'Expense', category: 'Feed', amount: 5000, desc: 'Layer mash 50kg' },
-        { id: '2', date: todayStr, type: 'Revenue', category: 'Crate Sales', amount: 8000, desc: 'Sales to wholesale' }
-      ]
-    };
-
-    let db = JSON.parse(localStorage.getItem('poultry_db')) || defaultData;
-
-    function saveDB() {
-      localStorage.setItem('poultry_db', JSON.stringify(db));
-      renderApp();
+    // Modal Control Functions
+    function openAuthModal(mode) {
+      document.getElementById('auth-modal').classList.remove('hidden');
+      switchAuthTab(mode);
     }
 
-    // Tab Navigation Logic
-    function switchTab(tabId) {
-      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-      document.getElementById('view-' + tabId).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-emerald-800', 'text-white');
-        btn.classList.add('hover:bg-emerald-800/60', 'text-emerald-100');
-      });
-      const activeBtn = document.getElementById('btn-' + tabId);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-emerald-800', 'text-white');
-        activeBtn.classList.remove('hover:bg-emerald-800/60', 'text-emerald-100');
-      }
+    function closeAuthModal() {
+      document.getElementById('auth-modal').classList.add('hidden');
     }
 
-    // Date Utilities
-    function calculateDaysDifference(date1Str, date2Str) {
-      const d1 = new Date(date1Str);
-      const d2 = new Date(date2Str);
-      const diffTime = d2 - d1;
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    }
+    function switchAuthTab(mode) {
+      const btnSignIn = document.getElementById('tab-signin');
+      const btnSignUp = document.getElementById('tab-signup');
+      const formSignIn = document.getElementById('form-signin');
+      const formSignUp = document.getElementById('form-signup');
 
-    function addDays(dateStr, days) {
-      const result = new Date(dateStr);
-      result.setDate(result.getDate() + parseInt(days));
-      return result.toISOString().split('T')[0];
-    }
+      if (mode === 'signin') {
+        formSignIn.classList.remove('hidden');
+        formSignUp.classList.add('hidden');
 
-    // Core Business Calculations
-    function getFlockDetails() {
-      if (!db.flock.arrivalDate) return { count: 0, ageDays: 0, ageWeeks: 0 };
-      const totalMortality = db.flock.mortalities.reduce((acc, curr) => acc + parseInt(curr.count), 0);
-      const currentCount = Math.max(0, db.flock.initialCount - totalMortality);
-      const ageDays = Math.max(0, calculateDaysDifference(db.flock.arrivalDate, todayStr));
-      const ageWeeks = (ageDays / 7).toFixed(1);
-      return { count: currentCount, ageDays, ageWeeks };
-    }
-
-    function getFeedStats() {
-      let total = 0;
-      let totalConsumed = 0;
-      let consumptionDays = 0;
-
-      db.feed.inventory.forEach(item => {
-        if (item.mode === 'purchase') total += parseInt(item.qty);
-        if (item.mode === 'consumed') {
-          total -= parseInt(item.qty);
-          totalConsumed += parseInt(item.qty);
-          consumptionDays++;
-        }
-      });
-
-      const avgDailyConsumption = consumptionDays > 0 ? (totalConsumed / consumptionDays) : 0;
-      const isLow = avgDailyConsumption > 0 ? total < (avgDailyConsumption * 7) : total < 50;
-
-      return { total, avgDailyConsumption, isLow };
-    }
-
-    // UI Renderers
-    function renderApp() {
-      document.getElementById('current-date-display').innerText = todayStr;
-      document.getElementById('nav-farm-name').innerText = db.profile.name || "Poultry Hub";
-
-      // 1. Dashboard Metrics
-      const flock = getFlockDetails();
-      document.getElementById('dash-flock-count').innerText = flock.count;
-      document.getElementById('dash-flock-age-tag').innerText = `Flock Age: ${flock.ageDays} Days (${flock.ageWeeks} Wks)`;
-
-      const todayEgg = db.egg.history.find(e => e.date === todayStr) || { actual: 0 };
-      const eggQuota = db.egg.quota || 1;
-      const eggRate = ((todayEgg.actual / eggQuota) * 100).toFixed(1);
-      document.getElementById('dash-egg-actual').innerText = todayEgg.actual;
-      document.getElementById('dash-egg-quota').innerText = eggQuota;
-      document.getElementById('dash-egg-rate').innerText = `${eggRate}% Rate`;
-
-      const todaySales = db.sales.filter(s => s.date === todayStr).reduce((acc, curr) => acc + parseInt(curr.crates), 0);
-      document.getElementById('dash-crates-sold').innerText = todaySales;
-
-      const feedStats = getFeedStats();
-      document.getElementById('dash-feed-inv').innerText = `${feedStats.total} kg`;
-      document.getElementById('dash-feed-alert').innerHTML = feedStats.isLow 
-        ? `<span class="text-rose-600 font-bold">⚠️ Low Inventory!</span>` 
-        : `<span class="text-emerald-600">Stock Healthy</span>`;
-
-      // Financial Today
-      const todayRev = db.finance.filter(f => f.date === todayStr && f.type === 'Revenue').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-      const todayExp = db.finance.filter(f => f.date === todayStr && f.type === 'Expense').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-      const net = todayRev - todayExp;
-
-      document.getElementById('dash-today-rev').innerText = `${todayRev.toLocaleString()} KES`;
-      document.getElementById('dash-today-exp').innerText = `${todayExp.toLocaleString()} KES`;
-      const netElem = document.getElementById('dash-today-net');
-      netElem.innerText = `${net.toLocaleString()} KES`;
-      netElem.className = `text-xl font-bold ${net >= 0 ? 'text-emerald-600' : 'text-rose-600'}`;
-
-      // Dashboard Lists
-      const upcomingAct = db.activities
-        .filter(a => !a.completed)
-        .slice(0, 4);
-      document.getElementById('dash-upcoming-activities').innerHTML = upcomingAct.length ? upcomingAct.map(a => `
-        <li class="py-2 flex justify-between items-center">
-          <div><p class="font-semibold text-slate-800">${a.title}</p><p class="text-xs text-slate-500">${a.date} ${a.time || ''}</p></div>
-          <span class="text-xs bg-slate-100 text-slate-700 px-2 py-1 rounded">${a.completed ? 'Done' : 'Pending'}</span>
-        </li>
-      `).join('') : '<li class="py-2 text-slate-400">No scheduled activities</li>';
-
-      const upcomingTreat = db.treatments
-        .filter(t => !t.completed && db.flock.arrivalDate)
-        .map(t => ({ ...t, dueDate: addDays(db.flock.arrivalDate, t.ageDays) }))
-        .slice(0, 4);
-      document.getElementById('dash-upcoming-treatments').innerHTML = upcomingTreat.length ? upcomingTreat.map(t => `
-        <li class="py-2 flex justify-between items-center">
-          <div><p class="font-semibold text-slate-800">${t.name}</p><p class="text-xs text-slate-500">Due: ${t.dueDate} (Age ${t.ageDays}d)</p></div>
-          <span class="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded">Upcoming</span>
-        </li>
-      `).join('') : '<li class="py-2 text-slate-400">No upcoming treatments</li>';
-
-      // Render Forms Default Values
-      document.getElementById('prof-name').value = db.profile.name || '';
-      document.getElementById('prof-location').value = db.profile.location || '';
-      document.getElementById('prof-size').value = db.profile.size || '';
-      document.getElementById('prof-est-date').value = db.profile.estDate || '';
-      document.getElementById('prof-contact').value = db.profile.contact || '';
-
-      document.getElementById('flock-count-input').value = db.flock.initialCount || '';
-      document.getElementById('flock-arrival-date').value = db.flock.arrivalDate || todayStr;
-      document.getElementById('flock-detail-count').innerText = flock.count;
-      document.getElementById('flock-detail-age').innerText = `${flock.ageDays} Days (${flock.ageWeeks} Wks)`;
-
-      document.getElementById('egg-quota-input').value = db.egg.quota || '';
-
-      // Render Tables
-      document.getElementById('mortality-history').innerHTML = db.flock.mortalities.map(m => `
-        <tr><td class="p-2">${m.date}</td><td class="p-2">${m.count}</td><td class="p-2">${m.reason}</td></tr>
-      `).join('');
-
-      document.getElementById('activity-list').innerHTML = db.activities.map(a => `
-        <li class="p-3 bg-slate-50 rounded-lg border border-slate-200 flex justify-between items-center">
-          <div>
-            <span class="font-semibold text-sm ${a.completed ? 'line-through text-slate-400' : 'text-slate-800'}">${a.title}</span>
-            <p class="text-xs text-slate-500">${a.desc || ''} | Date: ${a.date} ${a.time || ''}</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="toggleActivity('${a.id}')" class="text-xs ${a.completed ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-700'} px-2 py-1 rounded">
-              ${a.completed ? 'Completed' : 'Mark Done'}
-            </button>
-            <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-600 hover:underline">Delete</button>
-          </div>
-        </li>
-      `).join('');
-
-      document.getElementById('egg-history').innerHTML = db.egg.history.map(e => {
-        const rate = db.egg.quota ? ((e.actual / db.egg.quota) * 100).toFixed(1) : 0;
-        return `<tr><td class="p-2">${e.date}</td><td class="p-2">${e.actual}</td><td class="p-2">${db.egg.quota}</td><td class="p-2 font-semibold ${rate >= 90 ? 'text-emerald-600' : 'text-amber-600'}">${rate}%</td></tr>`;
-      }).join('');
-
-      document.getElementById('sales-history').innerHTML = db.sales.map(s => `
-        <tr><td class="p-2">${s.date}</td><td class="p-2">${s.crates}</td><td class="p-2">${s.price} KES</td><td class="p-2 font-bold text-emerald-700">${(s.crates * s.price).toLocaleString()} KES</td></tr>
-      `).join('');
-
-      document.getElementById('feed-history').innerHTML = db.feed.inventory.map(f => `
-        <tr><td class="p-2">${f.date}</td><td class="p-2">${f.type}</td><td class="p-2 font-bold ${f.mode === 'purchase' ? 'text-emerald-600' : 'text-rose-600'}">${f.mode === 'purchase' ? '+' : '-'}${f.qty} kg</td><td class="p-2 uppercase text-xs">${f.mode}</td></tr>
-      `).join('');
-
-      document.getElementById('treatment-list').innerHTML = db.treatments.map(t => {
-        const dueDate = db.flock.arrivalDate ? addDays(db.flock.arrivalDate, t.ageDays) : 'Set Flock Arrival First';
-        return `
-          <tr>
-            <td class="p-2 font-medium">${t.name} <span class="text-xs text-slate-400">(${t.type})</span></td>
-            <td class="p-2">${t.ageDays} Days</td>
-            <td class="p-2 font-semibold text-emerald-800">${dueDate}</td>
-            <td class="p-2"><span class="px-2 py-0.5 rounded text-xs ${t.completed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${t.completed ? 'Administered' : 'Scheduled'}</span></td>
-            <td class="p-2">
-              ${!t.completed ? `<button onclick="completeTreatment('${t.id}')" class="bg-emerald-700 text-white text-xs px-2 py-1 rounded">Mark Administered</button>` : `<span class="text-xs text-slate-400">${t.completedDate}</span>`}
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      document.getElementById('finance-history').innerHTML = db.finance.map(f => `
-        <tr>
-          <td class="p-2">${f.date}</td>
-          <td class="p-2 font-semibold ${f.type === 'Revenue' ? 'text-emerald-600' : 'text-rose-600'}">${f.type}</td>
-          <td class="p-2">${f.category}</td>
-          <td class="p-2 font-bold">${parseFloat(f.amount).toLocaleString()} KES</td>
-          <td class="p-2 text-slate-400">${f.desc || '-'}</td>
-        </tr>
-      `).join('');
-
-      lucide.createIcons();
-    }
-
-    // Action Handlers
-    function saveProfile(e) {
-      e.preventDefault();
-      db.profile = {
-        name: document.getElementById('prof-name').value,
-        location: document.getElementById('prof-location').value,
-        size: document.getElementById('prof-size').value,
-        estDate: document.getElementById('prof-est-date').value,
-        contact: document.getElementById('prof-contact').value
-      };
-      saveDB();
-      alert('Farm profile saved successfully!');
-    }
-
-    function saveFlock(e) {
-      e.preventDefault();
-      const count = parseInt(document.getElementById('flock-count-input').value);
-      if (count < 0) return alert('Flock count cannot be negative.');
-      db.flock.initialCount = count;
-      db.flock.arrivalDate = document.getElementById('flock-arrival-date').value;
-      saveDB();
-    }
-
-    function recordMortality(e) {
-      e.preventDefault();
-      const count = parseInt(document.getElementById('mort-count').value);
-      const reason = document.getElementById('mort-reason').value;
-      const date = document.getElementById('mort-date').value;
-      if (count <= 0) return alert('Number must be greater than zero.');
-      db.flock.mortalities.push({ count, reason, date });
-      saveDB();
-      e.target.reset();
-    }
-
-    function confirmResetFlock() {
-      if (confirm('Are you sure you want to reset flock data? This action will keep logs but clear settings.')) {
-        db.flock = { initialCount: 0, arrivalDate: '', mortalities: [] };
-        saveDB();
-      }
-    }
-
-    function addActivity(e) {
-      e.preventDefault();
-      db.activities.unshift({
-        id: Date.now().toString(),
-        title: document.getElementById('act-title').value,
-        desc: document.getElementById('act-desc').value,
-        date: document.getElementById('act-date').value,
-        time: document.getElementById('act-time').value,
-        completed: false
-      });
-      saveDB();
-      e.target.reset();
-    }
-
-    function toggleActivity(id) {
-      const act = db.activities.find(a => a.id === id);
-      if (act) act.completed = !act.completed;
-      saveDB();
-    }
-
-    function deleteActivity(id) {
-      db.activities = db.activities.filter(a => a.id !== id);
-      saveDB();
-    }
-
-    function saveEggQuota(e) {
-      e.preventDefault();
-      db.egg.quota = parseInt(document.getElementById('egg-quota-input').value);
-      saveDB();
-    }
-
-    function addEggProduction(e) {
-      e.preventDefault();
-      const actual = parseInt(document.getElementById('egg-actual-input').value);
-      const date = document.getElementById('egg-date-input').value;
-
-      const existingIndex = db.egg.history.findIndex(e => e.date === date);
-      if (existingIndex >= 0) {
-        db.egg.history[existingIndex].actual = actual;
+        btnSignIn.className = "flex-1 py-3 text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 transition-colors";
+        btnSignUp.className = "flex-1 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors";
       } else {
-        db.egg.history.unshift({ date, actual });
+        formSignUp.classList.remove('hidden');
+        formSignIn.classList.add('hidden');
+
+        btnSignUp.className = "flex-1 py-3 text-sm font-bold text-emerald-400 border-b-2 border-emerald-500 transition-colors";
+        btnSignIn.className = "flex-1 py-3 text-sm font-bold text-slate-400 hover:text-white transition-colors";
       }
-      saveDB();
     }
 
-    function addSale(e) {
+    function handleAuthSubmit(e) {
       e.preventDefault();
-      const crates = parseInt(document.getElementById('sale-crates').value);
-      const price = parseFloat(document.getElementById('sale-price').value);
-      const date = document.getElementById('sale-date').value;
-
-      db.sales.unshift({ id: Date.now().toString(), date, crates, price });
-
-      // Automatically add to revenue
-      db.finance.unshift({
-        id: Date.now().toString(),
-        date,
-        type: 'Revenue',
-        category: 'Crate Sales',
-        amount: crates * price,
-        desc: `Automatic log: ${crates} crates @ KES ${price}`
-      });
-
-      saveDB();
-      e.target.reset();
+      // On successful authentication submit, redirect directly to the dashboard app file
+      window.location.href = 'poultry-dashboard 45.html';
     }
 
-    function addFeedPurchase(e) {
-      e.preventDefault();
-      const type = document.getElementById('feed-p-type').value;
-      const qty = parseInt(document.getElementById('feed-p-qty').value);
-      const date = document.getElementById('feed-p-date').value;
-
-      db.feed.inventory.unshift({ date, type, qty, mode: 'purchase' });
-      saveDB();
-      e.target.reset();
-    }
-
-    function addFeedConsumption(e) {
-      e.preventDefault();
-      const qty = parseInt(document.getElementById('feed-c-qty').value);
-      const date = document.getElementById('feed-c-date').value;
-
-      db.feed.inventory.unshift({ date, type: 'Layers Mash', qty, mode: 'consumed' });
-      saveDB();
-      e.target.reset();
-    }
-
-    function addTreatmentPlan(e) {
-      e.preventDefault();
-      db.treatments.push({
-        id: Date.now().toString(),
-        name: document.getElementById('treat-name').value,
-        type: document.getElementById('treat-type').value,
-        ageDays: parseInt(document.getElementById('treat-age').value),
-        completed: false,
-        completedDate: null
-      });
-      saveDB();
-      e.target.reset();
-    }
-
-    function completeTreatment(id) {
-      const treat = db.treatments.find(t => t.id === id);
-      if (treat) {
-        treat.completed = true;
-        treat.completedDate = todayStr;
-      }
-      saveDB();
-    }
-
-    function addTransaction(e) {
-      e.preventDefault();
-      db.finance.unshift({
-        id: Date.now().toString(),
-        type: document.getElementById('fin-type').value,
-        category: document.getElementById('fin-cat').value,
-        amount: parseFloat(document.getElementById('fin-amount').value),
-        date: document.getElementById('fin-date').value,
-        desc: document.getElementById('fin-desc').value
-      });
-      saveDB();
-      e.target.reset();
-    }
-
-    // Set Default Input Dates to Today
-    document.getElementById('act-date').value = todayStr;
-    document.getElementById('mort-date').value = todayStr;
-    document.getElementById('egg-date-input').value = todayStr;
-    document.getElementById('sale-date').value = todayStr;
-    document.getElementById('feed-p-date').value = todayStr;
-    document.getElementById('feed-c-date').value = todayStr;
-    document.getElementById('fin-date').value = todayStr;
-
-    // Initial App Render
-    renderApp();
+    // Close modal when clicking on dark backdrop
+    document.getElementById('auth-modal').addEventListener('click', function(e) {
+      if (e.target === this) closeAuthModal();
+    });
   </script>
 </body>
 </html>
