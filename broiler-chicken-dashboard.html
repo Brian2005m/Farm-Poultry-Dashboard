@@ -1,0 +1,1816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broiler Chicken Farm Dashboard</title>
+  <!-- Tailwind CSS CDN for styling -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Chart.js for graph charts -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body class="bg-black text-slate-100 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar Navigation -->
+  <aside class="w-full md:w-64 bg-teal-950 text-white flex-shrink-0 flex flex-col justify-between">
+    <div>
+      <div class="p-5 border-b border-teal-900 flex items-center space-x-3">
+        <i data-lucide="drumstick" class="w-8 h-8 text-cyan-400"></i>
+        <div>
+          <h1 class="font-bold text-lg leading-tight" id="nav-farm-name">Broiler Hub</h1>
+          <p class="text-xs text-teal-300">Broiler Meat Production Management</p>
+        </div>
+      </div>
+      <nav class="p-3 space-y-1 text-sm font-medium">
+        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg bg-teal-800 text-white">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span>
+        </button>
+        <button onclick="switchTab('flock')" id="btn-flock" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="bird" class="w-5 h-5"></i><span>Flock Management</span>
+        </button>
+        <button onclick="switchTab('growth')" id="btn-growth" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="trending-up" class="w-5 h-5"></i><span>Growth &amp; Weight</span>
+        </button>
+        <button onclick="switchTab('sales')" id="btn-sales" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Sales Management</span>
+        </button>
+        <button onclick="switchTab('feed')" id="btn-feed" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="wheat" class="w-5 h-5"></i><span>Feed Management</span>
+        </button>
+        <button onclick="switchTab('treatment')" id="btn-treatment" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="syringe" class="w-5 h-5"></i><span>Treatment Schedule</span>
+        </button>
+        <button onclick="switchTab('finance')" id="btn-finance" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span>Financial Tracking</span>
+        </button>
+        <button onclick="switchTab('activity')" id="btn-activity" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="calendar" class="w-5 h-5"></i><span>Activity Scheduler</span>
+        </button>
+        <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-teal-800/60 text-teal-100">
+          <i data-lucide="user" class="w-5 h-5"></i><span>Farm Profile</span>
+        </button>
+      </nav>
+    </div>
+    <div class="p-4 border-t border-teal-900 text-xs text-teal-300">
+      <p>Today: <span id="current-date-display" class="font-semibold text-white"></span></p>
+    </div>
+  </aside>
+
+  <!-- Main Content Area -->
+  <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl">
+
+    <!-- Dashboard Home -->
+    <section id="view-dashboard" class="space-y-6">
+      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+        <h2 class="text-2xl font-bold text-slate-100">Dashboard Overview</h2>
+        <span class="text-sm bg-teal-900/50 text-teal-300 px-3 py-1 rounded-full font-medium" id="dash-oldest-batch-tag">Oldest Batch: -</span>
+      </div>
+
+      <!-- Quick Metrics Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Current Flock Count</p>
+            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-flock-count">0</h3>
+          </div>
+          <div class="bg-teal-900/40 p-3 rounded-lg text-teal-400"><i data-lucide="bird"></i></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Avg Weight (Latest Sample)</p>
+            <h3 class="text-2xl font-extrabold text-slate-100 mt-1"><span id="dash-avg-weight">0</span> g</h3>
+            <p class="text-xs font-semibold text-cyan-400 mt-0.5" id="dash-weight-vs-target">vs target: -</p>
+          </div>
+          <div class="bg-cyan-900/40 p-3 rounded-lg text-cyan-400"><i data-lucide="scale"></i></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Cumulative FCR (approx)</p>
+            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-fcr">-</h3>
+            <p class="text-xs text-slate-400 mt-0.5">Feed consumed ÷ live weight</p>
+          </div>
+          <div class="bg-blue-900/40 p-3 rounded-lg text-blue-400"><i data-lucide="calculator"></i></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+          <div>
+            <p class="text-xs uppercase font-semibold text-slate-400">Feed Inventory</p>
+            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-feed-inv">0 kg</h3>
+            <p class="text-xs text-slate-400 mt-0.5" id="dash-feed-alert"></p>
+          </div>
+          <div class="bg-lime-900/40 p-3 rounded-lg text-lime-400"><i data-lucide="wheat"></i></div>
+        </div>
+      </div>
+
+      <!-- Financial Quick Summary -->
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <span class="text-xs font-semibold text-slate-400 uppercase">Today's Revenue</span>
+          <p class="text-xl font-bold text-teal-400" id="dash-today-rev">0 KES</p>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-400 uppercase">Today's Expenses</span>
+          <p class="text-xl font-bold text-rose-400" id="dash-today-exp">0 KES</p>
+        </div>
+        <div>
+          <span class="text-xs font-semibold text-slate-400 uppercase">Net Profit / Loss</span>
+          <p class="text-xl font-bold" id="dash-today-net">0 KES</p>
+        </div>
+      </div>
+
+      <!-- Flock Batches at a Glance -->
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+          <i data-lucide="bird" class="w-5 h-5 text-teal-400"></i>
+          <span>Flock Batches at a Glance</span>
+        </h3>
+        <div id="dash-flock-batches" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+      </div>
+
+      <!-- Graph Charts Overview -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="line-chart" class="w-5 h-5 text-teal-400"></i>
+            <span>Growth Trend (Actual vs Target)</span>
+          </h3>
+          <div class="relative h-56"><canvas id="chart-growth-trend"></canvas></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-teal-400"></i>
+            <span>Revenue vs Expenses (Recent)</span>
+          </h3>
+          <div class="relative h-56"><canvas id="chart-finance-trend"></canvas></div>
+        </div>
+      </div>
+
+      <!-- Upcoming Activities & Treatments -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="calendar" class="w-5 h-5 text-teal-400"></i>
+            <span>Upcoming Activities (Next 7 Days)</span>
+          </h3>
+          <ul class="divide-y divide-neutral-800 text-sm" id="dash-upcoming-activities"></ul>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="syringe" class="w-5 h-5 text-teal-400"></i>
+            <span>Upcoming Treatments</span>
+          </h3>
+          <ul class="divide-y divide-neutral-800 text-sm" id="dash-upcoming-treatments"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Farm Profile -->
+    <section id="view-profile" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Farm Profile</h2>
+      <div class="bg-neutral-900 p-6 rounded-xl border border-neutral-800 shadow-sm max-w-2xl">
+        <form id="form-profile" onsubmit="saveProfile(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Farm Name</label>
+            <input type="text" id="prof-name" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Location</label>
+            <input type="text" id="prof-location" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Farm Size (e.g. Acres/Sqm)</label>
+              <input type="text" id="prof-size" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Establishment Date</label>
+              <input type="date" id="prof-est-date" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+            </div>
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Preferred Broiler Breed(s)</label>
+            <input type="text" id="prof-breed" placeholder="e.g. Cobb 500, Ross 308" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Contact Information</label>
+            <input type="text" id="prof-contact" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-teal-500 outline-none">
+          </div>
+          <button type="submit" class="bg-teal-700 hover:bg-teal-800 text-white font-medium px-5 py-2.5 rounded-lg text-sm">Save Profile</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Activity Scheduler -->
+    <section id="view-activity" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Activity Scheduler</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
+          <h3 class="font-bold text-slate-100 mb-4">Schedule Activity</h3>
+          <form id="form-activity" onsubmit="addActivity(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Title</label>
+              <input type="text" id="act-title" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
+              <textarea id="act-desc" rows="2" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></textarea>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+                <input type="date" id="act-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Time</label>
+                <input type="time" id="act-time" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+            </div>
+            <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 rounded-lg text-sm mt-2">Add Activity</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-4">Scheduled Activities</h3>
+          <ul id="activity-list" class="space-y-3"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Flock Management -->
+    <section id="view-flock" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Flock Management</h2>
+      <p class="text-sm text-slate-400 -mt-4">Track each day-old chick placement as its own batch, moving automatically through Starter → Grower → Finisher → Market Ready as it ages, so you always know how close each batch is to slaughter weight.</p>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="space-y-6">
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-4">Add Flock Batch</h3>
+            <form id="form-flock" onsubmit="addFlockBatch(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Batch Name / Label</label>
+                <input type="text" id="flock-name-input" placeholder="e.g. Batch C - Cobb 500" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Breed</label>
+                <input type="text" id="flock-breed-input" placeholder="e.g. Cobb 500, Ross 308, Arbor Acres" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Day-Old Chick Count</label>
+                <input type="number" id="flock-count-input" min="1" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Placement / Arrival Date</label>
+                <input type="date" id="flock-arrival-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <button type="submit" class="w-full bg-teal-700 hover:bg-teal-800 text-white font-medium py-2 rounded-lg text-sm">Add Batch</button>
+            </form>
+          </div>
+
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-4">Record Mortality / Reduction</h3>
+            <form id="form-mortality" onsubmit="recordMortality(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Flock Batch</label>
+                <select id="mort-flock-select" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Number of Birds</label>
+                <input type="number" id="mort-count" min="1" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Reason</label>
+                <select id="mort-reason" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                  <option>Natural / Unknown</option>
+                  <option>Disease</option>
+                  <option>Heat Stress</option>
+                  <option>Predation</option>
+                  <option>Culled (Runt/Injury)</option>
+                  <option>Sold Live</option>
+                  <option>Processed / Slaughtered</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+                <input type="date" id="mort-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <button type="submit" class="w-full bg-rose-800 hover:bg-rose-900 text-white font-medium py-2 rounded-lg text-sm">Record</button>
+            </form>
+          </div>
+        </div>
+        <div class="lg:col-span-2 space-y-6">
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-4">Flock Batches Overview</h3>
+            <div id="flock-batches-overview" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+          </div>
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-4">Mortality Log</h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-neutral-800 uppercase text-slate-400">
+                  <tr><th class="p-2">Date</th><th class="p-2">Batch</th><th class="p-2">Count</th><th class="p-2">Reason</th></tr>
+                </thead>
+                <tbody id="mortality-history" class="divide-y divide-neutral-800"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Growth & Weight Tracking -->
+    <section id="view-growth" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Growth &amp; Weight Tracking</h2>
+      <p class="text-sm text-slate-400 -mt-4">Weigh a sample of birds from each batch every week and log the average. This is compared against a standard broiler growth benchmark so you can spot batches falling behind target weight early.</p>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
+          <h3 class="font-bold text-slate-100 mb-4">Record Weight Sample</h3>
+          <form onsubmit="addGrowthRecord(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Flock Batch</label>
+              <select id="growth-flock-select" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Average Weight (grams/bird)</label>
+              <input type="number" step="1" min="0" id="growth-weight" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Sample Size (birds weighed)</label>
+              <input type="number" min="1" id="growth-sample" placeholder="e.g. 20" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date Weighed</label>
+              <input type="date" id="growth-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Save Weight Sample</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 class="font-bold text-slate-100">Weight Sample History</h3>
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-semibold text-slate-400 uppercase whitespace-nowrap">Viewing:</label>
+              <select id="growth-batch-view" onchange="onGrowthBatchChange(this.value)" class="border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-xs"></select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-neutral-800 uppercase text-slate-400">
+                <tr><th class="p-2">Date</th><th class="p-2">Age (days)</th><th class="p-2">Avg Weight</th><th class="p-2">Target Weight</th><th class="p-2">Variance</th></tr>
+              </thead>
+              <tbody id="growth-history" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+          <i data-lucide="line-chart" class="w-5 h-5 text-teal-400"></i>
+          <span>Growth Curve — Actual vs Standard Benchmark</span>
+        </h3>
+        <div class="relative h-72"><canvas id="chart-growth-full"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Sales Management -->
+    <section id="view-sales" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Sales Management</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
+          <h3 class="font-bold text-slate-100 mb-4">Record Sale</h3>
+          <form onsubmit="addSale(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Product Sold</label>
+              <select id="sale-type" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <option value="Live Birds (kg)">Live Birds (by kg)</option>
+                <option value="Live Birds (per bird)">Live Birds (per bird)</option>
+                <option value="Dressed Chicken (kg)">Dressed / Processed Chicken (by kg)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Quantity Sold</label>
+              <input type="number" step="0.1" min="0" id="sale-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Price Per Unit (KES)</label>
+              <input type="number" step="0.01" min="0" id="sale-price" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+              <input type="date" id="sale-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Save Sale Entry</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-4">Sales Log</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-neutral-800 uppercase text-slate-400">
+                <tr><th class="p-2">Date</th><th class="p-2">Product</th><th class="p-2">Qty</th><th class="p-2">Price/Unit</th><th class="p-2">Total Revenue</th></tr>
+              </thead>
+              <tbody id="sales-history" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-teal-400"></i>
+            <span>Sales Revenue Trend (By Date)</span>
+          </h3>
+          <div class="relative h-72"><canvas id="chart-sales"></canvas></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="pie-chart" class="w-5 h-5 text-teal-400"></i>
+            <span>Revenue Share By Product</span>
+          </h3>
+          <div class="relative h-72 max-w-sm mx-auto"><canvas id="chart-sales-mix"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Feed Management -->
+    <section id="view-feed" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Feed Management</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="space-y-6">
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-3">Add Purchased Feed</h3>
+            <form onsubmit="addFeedPurchase(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Feed Type</label>
+                <input type="text" id="feed-p-type" placeholder="e.g. Broiler Starter Mash" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Quantity (kg)</label>
+                <input type="number" id="feed-p-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+                <input type="date" id="feed-p-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Record Purchase</button>
+            </form>
+          </div>
+          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+            <h3 class="font-bold text-slate-100 mb-3">Record Daily Consumption</h3>
+            <form onsubmit="addFeedConsumption(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Feed Type</label>
+                <select id="feed-c-type" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Quantity Consumed (kg)</label>
+                <input type="number" id="feed-c-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+                <input type="date" id="feed-c-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Record Consumption</button>
+            </form>
+          </div>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-4">Feed Logs</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-neutral-800 uppercase text-slate-400">
+                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Change (kg)</th><th class="p-2">Details</th></tr>
+              </thead>
+              <tbody id="feed-history" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Feed Formulation (Mix Your Own Feed) -->
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+        <h3 class="font-bold text-slate-100 mb-1 flex items-center space-x-2">
+          <i data-lucide="flask-conical" class="w-5 h-5 text-teal-400"></i>
+          <span>Feed Formulation (Mix Your Own Feed)</span>
+        </h3>
+        <p class="text-xs text-slate-400 mb-4">Record the raw ingredients you've acquired, build a recipe with the proportion of each (e.g. a high-protein starter mash), then mix a batch. Mixing deducts ingredient stock and adds the finished feed straight into your inventory.</p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          <!-- 1. Raw Ingredients Acquired -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-slate-200 text-sm">1. Raw Ingredients Acquired</h4>
+            <form onsubmit="addFeedIngredient(event)" class="space-y-3">
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Ingredient Name</label>
+                <input type="text" id="feed-ing-name" placeholder="e.g. Maize, Soybean Meal, Fishmeal" required list="ingredient-name-options" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <datalist id="ingredient-name-options"></datalist>
+              </div>
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Qty (kg)</label>
+                  <input type="number" step="0.1" min="0" id="feed-ing-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Cost/kg (KES)</label>
+                  <input type="number" step="0.01" min="0" id="feed-ing-cost" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date Acquired</label>
+                <input type="date" id="feed-ing-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              </div>
+              <button type="submit" class="w-full bg-lime-700 text-white font-medium py-2 rounded-lg text-sm">Add Ingredient Stock</button>
+            </form>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-neutral-800 uppercase text-slate-400">
+                  <tr><th class="p-2">Ingredient</th><th class="p-2">Stock (kg)</th><th class="p-2">Cost/kg</th></tr>
+                </thead>
+                <tbody id="ingredient-stock-table" class="divide-y divide-neutral-800"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 2. Build a Formula -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-slate-200 text-sm">2. Build a Formula (Recipe)</h4>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Formula Name</label>
+              <input type="text" id="formula-name" placeholder="e.g. My Finisher Mash" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div id="formula-rows" class="space-y-2"></div>
+            <div class="flex items-center justify-between">
+              <button type="button" onclick="addFormulaRow()" class="text-xs text-teal-400 hover:underline flex items-center space-x-1">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i><span>Add Ingredient Line</span>
+              </button>
+              <span class="text-xs font-semibold text-cyan-400" id="formula-total-pct">Total: 0%</span>
+            </div>
+            <button type="button" onclick="saveFormula()" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Save Formula</button>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs text-slate-300">
+                <thead class="bg-neutral-800 uppercase text-slate-400">
+                  <tr><th class="p-2">Formula</th><th class="p-2">Composition</th><th class="p-2">Est. Cost/kg</th><th class="p-2"></th></tr>
+                </thead>
+                <tbody id="formula-list-table" class="divide-y divide-neutral-800"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 3. Mix a Batch -->
+          <div class="space-y-3">
+            <h4 class="font-semibold text-slate-200 text-sm">3. Mix a Batch</h4>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Formula</label>
+              <select id="mix-formula-select" onchange="previewMix()" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Total Batch Size (kg)</label>
+              <input type="number" step="0.1" min="0" id="mix-qty" oninput="previewMix()" placeholder="e.g. 100" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div id="mix-preview" class="text-xs text-slate-400 bg-neutral-800 rounded-lg p-3 space-y-1">Select a formula and enter a batch size to see ingredient needs.</div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date Mixed</label>
+              <input type="date" id="mix-date" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <button type="button" onclick="mixFormulaBatch()" class="w-full bg-cyan-700 text-white font-medium py-2 rounded-lg text-sm">Mix &amp; Add to Feed Stock</button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+          <i data-lucide="bar-chart-3" class="w-5 h-5 text-teal-400"></i>
+          <span>Feed Purchases vs Consumption</span>
+        </h3>
+        <div class="relative h-72"><canvas id="chart-feed"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Treatment Scheduling -->
+    <section id="view-treatment" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Treatment Scheduling</h2>
+      <p class="text-sm text-slate-400 -mt-4">Broilers move fast — most of the vaccination schedule happens in the first 3 weeks. Observe the withdrawal period (no medication) before slaughter.</p>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
+          <h3 class="font-bold text-slate-100 mb-3">Create Treatment Plan</h3>
+          <div class="mb-4">
+            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Kind of Treatment (Day-Old Chick → Market)</label>
+            <select id="treat-preset" onchange="applyTreatmentPreset(this.value)" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <option value="">-- Select a standard schedule item --</option>
+            </select>
+            <p class="text-xs text-slate-400 mt-1">Picking an item auto-fills the fields below. You can still edit them or type your own.</p>
+          </div>
+          <form onsubmit="addTreatmentPlan(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Treatment Name (Kind of Treatment)</label>
+              <input type="text" id="treat-name" placeholder="e.g. Gumboro (IBD) Vaccine" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Type</label>
+              <select id="treat-type" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <option value="Vaccination">Vaccination</option>
+                <option value="Medication">Medication</option>
+                <option value="Vitamin/Supplement">Vitamin/Supplement</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Recommended Age (Days)</label>
+              <input type="number" id="treat-age" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Save Plan</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+            <h3 class="font-bold text-slate-100">Treatment Schedule &amp; Log</h3>
+            <div class="flex items-center gap-2">
+              <label class="text-xs font-semibold text-slate-400 uppercase whitespace-nowrap">Viewing schedule for:</label>
+              <select id="treat-batch-view" onchange="onTreatmentBatchChange(this.value)" class="border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-xs"></select>
+            </div>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-neutral-800 uppercase text-slate-400">
+                <tr><th class="p-2">Treatment</th><th class="p-2">Target Age</th><th class="p-2">Due Date</th><th class="p-2">Status</th><th class="p-2">Action</th></tr>
+              </thead>
+              <tbody id="treatment-list" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+          <i data-lucide="pie-chart" class="w-5 h-5 text-teal-400"></i>
+          <span>Treatment Completion Status</span>
+        </h3>
+        <div class="relative h-64 max-w-sm mx-auto"><canvas id="chart-treatment-status"></canvas></div>
+      </div>
+    </section>
+
+    <!-- Financial Tracking -->
+    <section id="view-finance" class="space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-slate-100">Financial Tracking</h2>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
+          <h3 class="font-bold text-slate-100 mb-4">Add Transaction</h3>
+          <form onsubmit="addTransaction(event)" class="space-y-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Type</label>
+              <select id="fin-type" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <option value="Revenue">Revenue</option>
+                <option value="Expense">Expense</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Category</label>
+              <input type="text" id="fin-cat" list="fin-cat-options" placeholder="e.g. Feed, Day-Old Chicks, Vaccines, Live Birds" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <datalist id="fin-cat-options">
+                <option value="Day-Old Chicks">
+                <option value="Feed">
+                <option value="Vaccines/Medication">
+                <option value="Labor">
+                <option value="Bedding/Litter">
+                <option value="Utilities">
+                <option value="Transport">
+                <option value="Live Birds (kg)">
+                <option value="Live Birds (per bird)">
+                <option value="Dressed Chicken (kg)">
+              </datalist>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Amount (KES)</label>
+              <input type="number" step="0.01" min="0" id="fin-amount" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
+              <input type="date" id="fin-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
+              <input type="text" id="fin-desc" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+            </div>
+            <button type="submit" class="w-full bg-teal-700 text-white font-medium py-2 rounded-lg text-sm">Save Transaction</button>
+          </form>
+        </div>
+        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-4">Transaction Log</h3>
+          <div class="overflow-x-auto max-h-96 overflow-y-auto">
+            <table class="w-full text-left text-xs text-slate-300">
+              <thead class="bg-neutral-800 uppercase text-slate-400 sticky top-0">
+                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Category</th><th class="p-2">Amount</th><th class="p-2">Description</th></tr>
+              </thead>
+              <tbody id="finance-history" class="divide-y divide-neutral-800"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="bar-chart-3" class="w-5 h-5 text-teal-400"></i>
+            <span>Revenue vs Expenses (Full History)</span>
+          </h3>
+          <div class="relative h-72"><canvas id="chart-finance-full"></canvas></div>
+        </div>
+        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
+          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
+            <i data-lucide="trending-up" class="w-5 h-5 text-teal-400"></i>
+            <span>Cumulative Net Profit / Loss</span>
+          </h3>
+          <div class="relative h-72"><canvas id="chart-net-cumulative"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // ---------------------------------------------------------------------
+    // Date helpers
+    // ---------------------------------------------------------------------
+    const todayStr = new Date().toISOString().split('T')[0];
+
+    function calculateDaysDifference(date1Str, date2Str) {
+      const d1 = new Date(date1Str);
+      const d2 = new Date(date2Str);
+      const diffTime = d2 - d1;
+      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    }
+
+    function addDays(dateStr, days) {
+      const result = new Date(dateStr);
+      result.setDate(result.getDate() + parseInt(days));
+      return result.toISOString().split('T')[0];
+    }
+
+    // ---------------------------------------------------------------------
+    // Broiler-specific standard schedules
+    // ---------------------------------------------------------------------
+
+    // Standard broiler vaccination / treatment schedule, day-old chick to market weight (~5-6 weeks)
+    const PRESET_TREATMENTS = [
+      { name: "Marek's Disease Vaccine (usually given at hatchery)", type: 'Vaccination', ageDays: 1 },
+      { name: 'Vitamin & Electrolyte Boost (Anti-stress, first week)', type: 'Vitamin/Supplement', ageDays: 3 },
+      { name: 'Newcastle Disease + Infectious Bronchitis Vaccine (HB1/IB)', type: 'Vaccination', ageDays: 7 },
+      { name: 'Gumboro (IBD) Vaccine – 1st Dose', type: 'Vaccination', ageDays: 14 },
+      { name: 'Newcastle Disease Lasota Booster', type: 'Vaccination', ageDays: 18 },
+      { name: 'Gumboro (IBD) Vaccine – 2nd Dose (Booster)', type: 'Vaccination', ageDays: 21 },
+      { name: 'Multivitamin / Anti-stress Supplement', type: 'Vitamin/Supplement', ageDays: 28 },
+      { name: 'Coccidiosis Watch / Medication (if symptoms present)', type: 'Medication', ageDays: 30 },
+      { name: 'Pre-Market Drug Withdrawal Check (no medication 5-7 days before slaughter)', type: 'Medication', ageDays: 35 }
+    ];
+
+    // Approximate industry-standard broiler live-weight benchmark (grams) by age in days,
+    // used only as a reference curve for comparison — actual performance varies by breed/feed/climate.
+    const TARGET_WEIGHT_CURVE = [
+      { day: 0, grams: 42 },
+      { day: 7, grams: 150 },
+      { day: 14, grams: 400 },
+      { day: 21, grams: 750 },
+      { day: 28, grams: 1200 },
+      { day: 35, grams: 1700 },
+      { day: 42, grams: 2200 },
+      { day: 49, grams: 2700 }
+    ];
+
+    function getTargetWeight(ageDays) {
+      const pts = TARGET_WEIGHT_CURVE;
+      if (ageDays <= pts[0].day) return pts[0].grams;
+      if (ageDays >= pts[pts.length - 1].day) return pts[pts.length - 1].grams;
+      for (let i = 0; i < pts.length - 1; i++) {
+        const a = pts[i], b = pts[i + 1];
+        if (ageDays >= a.day && ageDays <= b.day) {
+          const frac = (ageDays - a.day) / (b.day - a.day);
+          return Math.round(a.grams + frac * (b.grams - a.grams));
+        }
+      }
+      return null;
+    }
+
+    function getStage(ageDays) {
+      if (ageDays <= 10) return 'Starter (0-10d)';
+      if (ageDays <= 24) return 'Grower (11-24d)';
+      if (ageDays <= 42) return 'Finisher (25-42d)';
+      return 'Market Ready (42d+)';
+    }
+
+    // ---------------------------------------------------------------------
+    // Default / seed data
+    // ---------------------------------------------------------------------
+    const defaultData = {
+      profile: { name: "Kilimo Broiler Farm", location: "Kiambu County", size: "1 Acre", estDate: "2024-03-10", breed: "Cobb 500, Ross 308", contact: "+254 700 000 000" },
+      flocks: [
+        {
+          id: 'batch-a', batchName: 'Batch A - Cobb 500', breed: 'Cobb 500', initialCount: 500,
+          arrivalDate: addDays(todayStr, -28),
+          mortalities: [{ date: addDays(todayStr, -25), count: 8, reason: 'Natural / Unknown' }]
+        },
+        {
+          id: 'batch-b', batchName: 'Batch B - Ross 308', breed: 'Ross 308', initialCount: 300,
+          arrivalDate: addDays(todayStr, -10),
+          mortalities: []
+        }
+      ],
+      activities: [
+        { id: '1', title: 'Vaccinate Batch B (Gumboro 1st dose)', desc: 'Administer IBD vaccine via drinking water, withhold water 1-2 hrs before', date: addDays(todayStr, 3), time: '07:00', completed: false }
+      ],
+      growth: {
+        history: [
+          { batchId: 'batch-a', date: addDays(todayStr, -21), ageDays: 7, avgWeightG: 155, sampleSize: 20 },
+          { batchId: 'batch-a', date: addDays(todayStr, -14), ageDays: 14, avgWeightG: 410, sampleSize: 20 },
+          { batchId: 'batch-a', date: addDays(todayStr, -7), ageDays: 21, avgWeightG: 780, sampleSize: 20 },
+          { batchId: 'batch-a', date: todayStr, ageDays: 28, avgWeightG: 1230, sampleSize: 25 },
+          { batchId: 'batch-b', date: addDays(todayStr, -3), ageDays: 7, avgWeightG: 148, sampleSize: 15 }
+        ]
+      },
+      sales: [
+        { id: '1', date: todayStr, type: 'Live Birds (kg)', qty: 45, price: 350 },
+        { id: '2', date: todayStr, type: 'Dressed Chicken (kg)', qty: 20, price: 480 }
+      ],
+      feed: {
+        inventory: [
+          { date: addDays(todayStr, -21), type: 'Broiler Starter Mash', qty: 250, mode: 'purchase' },
+          { date: addDays(todayStr, -14), type: 'Broiler Starter Mash', qty: 90, mode: 'consumed' },
+          { date: addDays(todayStr, -14), type: 'Broiler Grower Mash', qty: 400, mode: 'purchase' },
+          { date: addDays(todayStr, -3), type: 'Broiler Grower Mash', qty: 150, mode: 'consumed' },
+          { date: todayStr, type: 'Broiler Grower Mash', qty: 45, mode: 'consumed' }
+        ],
+        ingredients: [],
+        formulas: []
+      },
+      treatments: PRESET_TREATMENTS.map((t, i) => ({
+        id: 'preset-' + i,
+        name: t.name,
+        type: t.type,
+        ageDays: t.ageDays
+      })),
+      treatmentLog: [],
+      finance: [
+        { id: '1', date: addDays(todayStr, -28), type: 'Expense', category: 'Day-Old Chicks', amount: 35000, desc: '500 day-old Cobb 500 chicks' },
+        { id: '2', date: addDays(todayStr, -14), type: 'Expense', category: 'Feed', amount: 26000, desc: 'Broiler grower mash 400kg' },
+        { id: '3', date: todayStr, type: 'Revenue', category: 'Live Birds (kg)', amount: 15750, desc: 'Live birds sold to trader' },
+        { id: '4', date: todayStr, type: 'Revenue', category: 'Dressed Chicken (kg)', amount: 9600, desc: 'Dressed chicken sold retail' }
+      ]
+    };
+
+    let db = JSON.parse(localStorage.getItem('broiler_db')) || defaultData;
+
+    // --- Safety defaults for partially-saved data ---
+    if (!db.flocks) db.flocks = [];
+    if (!db.activities) db.activities = [];
+    if (!db.growth) db.growth = { history: [] };
+    if (!db.growth.history) db.growth.history = [];
+    if (!db.sales) db.sales = [];
+    if (!db.feed) db.feed = { inventory: [], ingredients: [], formulas: [] };
+    if (!db.feed.ingredients) db.feed.ingredients = [];
+    if (!db.feed.formulas) db.feed.formulas = [];
+    if (!db.treatments) db.treatments = PRESET_TREATMENTS.map((t, i) => ({ id: 'preset-' + i, name: t.name, type: t.type, ageDays: t.ageDays }));
+    if (!db.treatmentLog) db.treatmentLog = [];
+    if (!db.finance) db.finance = [];
+    if (!db.profile) db.profile = { name: '', location: '', size: '', estDate: '', breed: '', contact: '' };
+
+    // Which flock batch's treatment schedule / growth history is currently shown
+    let selectedTreatmentBatchId = null;
+    let selectedGrowthBatchId = null;
+
+    function saveDB() {
+      localStorage.setItem('broiler_db', JSON.stringify(db));
+      renderApp();
+    }
+
+    // ---------------------------------------------------------------------
+    // Tab navigation
+    // ---------------------------------------------------------------------
+    function switchTab(tabId) {
+      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+      document.getElementById('view-' + tabId).classList.remove('hidden');
+
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('bg-teal-800', 'text-white');
+        btn.classList.add('hover:bg-teal-800/60', 'text-teal-100');
+      });
+      const activeBtn = document.getElementById('btn-' + tabId);
+      if (activeBtn) {
+        activeBtn.classList.add('bg-teal-800', 'text-white');
+        activeBtn.classList.remove('hover:bg-teal-800/60', 'text-teal-100');
+      }
+
+      // Re-render charts in the newly visible section so they pick up correct dimensions
+      // (Chart.js sizes canvases to 0 while their container is display:none).
+      if (typeof renderCharts === 'function') renderCharts();
+    }
+
+    // ---------------------------------------------------------------------
+    // Core business calculations
+    // ---------------------------------------------------------------------
+    function getFlockBatches() {
+      return (db.flocks || []).map(f => {
+        const mortalityTotal = (f.mortalities || []).reduce((acc, m) => acc + (parseInt(m.count) || 0), 0);
+        const currentCount = Math.max(0, (parseInt(f.initialCount) || 0) - mortalityTotal);
+        const ageDays = f.arrivalDate ? Math.max(0, calculateDaysDifference(f.arrivalDate, todayStr)) : 0;
+        const stage = getStage(ageDays);
+        const targetWeight = getTargetWeight(ageDays);
+        const batchGrowth = (db.growth.history || []).filter(g => g.batchId === f.id).sort((a, b) => a.ageDays - b.ageDays);
+        const latestWeight = batchGrowth.length ? batchGrowth[batchGrowth.length - 1] : null;
+        return { ...f, mortalityTotal, currentCount, ageDays, stage, targetWeight, latestWeight };
+      });
+    }
+
+    function getTotalFlockCount() {
+      return getFlockBatches().reduce((acc, f) => acc + f.currentCount, 0);
+    }
+
+    function populateBatchSelect(selectEl, batches, currentValue) {
+      if (!selectEl) return;
+      const prev = currentValue !== undefined ? currentValue : selectEl.value;
+      selectEl.innerHTML = batches.length
+        ? batches.map(b => `<option value="${b.id}">${b.batchName} — ${b.ageDays}d old</option>`).join('')
+        : '<option value="">No batches yet — add one first</option>';
+      if (batches.some(b => b.id === prev)) selectEl.value = prev;
+    }
+
+    function getFeedStats() {
+      let total = 0;
+      let totalPurchased = 0;
+      let totalConsumed = 0;
+      let consumptionDays = 0;
+
+      db.feed.inventory.forEach(item => {
+        if (item.mode === 'purchase') { total += parseInt(item.qty); totalPurchased += parseInt(item.qty); }
+        if (item.mode === 'consumed') {
+          total -= parseInt(item.qty);
+          totalConsumed += parseInt(item.qty);
+          consumptionDays++;
+        }
+      });
+
+      const avgDailyConsumption = consumptionDays > 0 ? (totalConsumed / consumptionDays) : 0;
+      const isLow = avgDailyConsumption > 0 ? total < (avgDailyConsumption * 7) : total < 50;
+
+      return { total, totalPurchased, totalConsumed, avgDailyConsumption, isLow };
+    }
+
+    // Simplified farm-wide FCR: cumulative feed consumed (kg) divided by the current
+    // estimated live weight (kg) of birds still on the farm (latest weight sample x current count).
+    // This is an approximation suitable for a small/medium farm dashboard, not a precise per-batch FCR.
+    function getFarmFCR() {
+      const feedStats = getFeedStats();
+      const batches = getFlockBatches();
+      let liveWeightKg = 0;
+      batches.forEach(b => {
+        if (b.latestWeight) liveWeightKg += (b.latestWeight.avgWeightG / 1000) * b.currentCount;
+      });
+      if (!liveWeightKg) return null;
+      return feedStats.totalConsumed / liveWeightKg;
+    }
+
+    // ---------------------------------------------------------------------
+    // Chart rendering
+    // ---------------------------------------------------------------------
+    let chartInstances = {};
+    function renderChart(id, config) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      if (chartInstances[id]) chartInstances[id].destroy();
+      chartInstances[id] = new Chart(canvas.getContext('2d'), config);
+    }
+
+    function aggregateFinanceByDate(finance) {
+      const map = {};
+      finance.forEach(f => {
+        if (!map[f.date]) map[f.date] = { rev: 0, exp: 0 };
+        if (f.type === 'Revenue') map[f.date].rev += parseFloat(f.amount) || 0;
+        else map[f.date].exp += parseFloat(f.amount) || 0;
+      });
+      return Object.keys(map).sort().map(date => ({ date, rev: map[date].rev, exp: map[date].exp }));
+    }
+
+    function aggregateFeedByDate(inventory) {
+      const map = {};
+      inventory.forEach(f => {
+        if (!map[f.date]) map[f.date] = { purchased: 0, consumed: 0 };
+        if (f.mode === 'purchase') map[f.date].purchased += parseInt(f.qty) || 0;
+        else map[f.date].consumed += parseInt(f.qty) || 0;
+      });
+      return Object.keys(map).sort().map(date => ({ date, purchased: map[date].purchased, consumed: map[date].consumed }));
+    }
+
+    function renderCharts() {
+      const lineOpts = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { labels: { color: '#cbd5e1' } } },
+        scales: {
+          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.06)' } },
+          y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+        }
+      };
+
+      const batches = getFlockBatches();
+
+      // --- Growth trend (dashboard, oldest batch, last few samples vs target) ---
+      const dashBatch = batches.length ? [...batches].sort((a, b) => b.ageDays - a.ageDays)[0] : null;
+      const dashGrowth = dashBatch ? (db.growth.history || []).filter(g => g.batchId === dashBatch.id).sort((a, b) => a.ageDays - b.ageDays).slice(-7) : [];
+      renderChart('chart-growth-trend', {
+        type: 'line',
+        data: {
+          labels: dashGrowth.map(g => `Day ${g.ageDays}`),
+          datasets: [
+            { label: 'Actual Weight (g)', data: dashGrowth.map(g => g.avgWeightG), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.15)', tension: 0.3, fill: true },
+            { label: 'Target Weight (g)', data: dashGrowth.map(g => getTargetWeight(g.ageDays)), borderColor: '#22d3ee', borderDash: [5, 5], tension: 0.3, fill: false, pointRadius: 0 }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Growth full history (Growth & Weight page, selected batch vs benchmark curve) ---
+      const growthBatchId = selectedGrowthBatchId || (batches.length ? batches[0].id : null);
+      const growthFull = growthBatchId ? (db.growth.history || []).filter(g => g.batchId === growthBatchId).sort((a, b) => a.ageDays - b.ageDays) : [];
+      renderChart('chart-growth-full', {
+        type: 'line',
+        data: {
+          labels: growthFull.map(g => `Day ${g.ageDays}`),
+          datasets: [
+            { label: 'Actual Weight (g)', data: growthFull.map(g => g.avgWeightG), borderColor: '#2dd4bf', backgroundColor: 'rgba(45,212,191,0.15)', tension: 0.3, fill: true },
+            { label: 'Target Weight (g)', data: growthFull.map(g => getTargetWeight(g.ageDays)), borderColor: '#22d3ee', borderDash: [5, 5], tension: 0.3, fill: false, pointRadius: 0 }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Finance trend (dashboard, last 7 dates) ---
+      const financeAgg = aggregateFinanceByDate(db.finance);
+      const financeRecent = financeAgg.slice(-7);
+      renderChart('chart-finance-trend', {
+        type: 'bar',
+        data: {
+          labels: financeRecent.map(f => f.date),
+          datasets: [
+            { label: 'Revenue (KES)', data: financeRecent.map(f => f.rev), backgroundColor: '#2dd4bf' },
+            { label: 'Expenses (KES)', data: financeRecent.map(f => f.exp), backgroundColor: '#fb7185' }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Finance full history (Financial Tracking page) ---
+      renderChart('chart-finance-full', {
+        type: 'bar',
+        data: {
+          labels: financeAgg.map(f => f.date),
+          datasets: [
+            { label: 'Revenue (KES)', data: financeAgg.map(f => f.rev), backgroundColor: '#2dd4bf' },
+            { label: 'Expenses (KES)', data: financeAgg.map(f => f.exp), backgroundColor: '#fb7185' }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Cumulative net profit/loss ---
+      let running = 0;
+      const cumulative = financeAgg.map(f => { running += (f.rev - f.exp); return { date: f.date, net: running }; });
+      renderChart('chart-net-cumulative', {
+        type: 'line',
+        data: {
+          labels: cumulative.map(c => c.date),
+          datasets: [
+            { label: 'Cumulative Net (KES)', data: cumulative.map(c => c.net), borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.15)', tension: 0.3, fill: true }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Sales revenue trend (total revenue per date, across all products) ---
+      const salesByDate = {};
+      db.sales.forEach(s => {
+        salesByDate[s.date] = (salesByDate[s.date] || 0) + (s.qty * s.price);
+      });
+      const salesDates = Object.keys(salesByDate).sort();
+      renderChart('chart-sales', {
+        type: 'bar',
+        data: {
+          labels: salesDates,
+          datasets: [
+            { label: 'Sales Revenue (KES)', data: salesDates.map(d => salesByDate[d]), backgroundColor: '#2dd4bf' }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Revenue share by product type (doughnut) ---
+      const salesByType = {};
+      db.sales.forEach(s => {
+        const t = s.type || 'Live Birds (kg)';
+        salesByType[t] = (salesByType[t] || 0) + (s.qty * s.price);
+      });
+      renderChart('chart-sales-mix', {
+        type: 'doughnut',
+        data: {
+          labels: Object.keys(salesByType),
+          datasets: [{ data: Object.values(salesByType), backgroundColor: ['#2dd4bf', '#22d3ee', '#60a5fa', '#a78bfa', '#fb923c'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } } }
+      });
+
+      // --- Feed purchases vs consumption ---
+      const feedAgg = aggregateFeedByDate(db.feed.inventory);
+      renderChart('chart-feed', {
+        type: 'bar',
+        data: {
+          labels: feedAgg.map(f => f.date),
+          datasets: [
+            { label: 'Purchased (kg)', data: feedAgg.map(f => f.purchased), backgroundColor: '#2dd4bf' },
+            { label: 'Consumed (kg)', data: feedAgg.map(f => f.consumed), backgroundColor: '#fb923c' }
+          ]
+        },
+        options: lineOpts
+      });
+
+      // --- Treatment completion status (doughnut) ---
+      let done = 0, pending = 0;
+      batches.forEach(b => {
+        db.treatments.forEach(t => {
+          const logged = (db.treatmentLog || []).some(l => l.batchId === b.id && l.treatmentId === t.id);
+          if (logged) done++; else pending++;
+        });
+      });
+      renderChart('chart-treatment-status', {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Pending'],
+          datasets: [{ data: [done, pending], backgroundColor: ['#2dd4bf', '#475569'] }]
+        },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } } }
+      });
+
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ---------------------------------------------------------------------
+    // Master render function
+    // ---------------------------------------------------------------------
+    function renderApp() {
+      document.getElementById('current-date-display').innerText = todayStr;
+      document.getElementById('nav-farm-name').innerText = db.profile.name || 'Broiler Hub';
+
+      const flockBatches = getFlockBatches();
+      const oldest = flockBatches.length ? [...flockBatches].sort((a, b) => b.ageDays - a.ageDays)[0] : null;
+      document.getElementById('dash-oldest-batch-tag').innerText = oldest ? `Oldest Batch: ${oldest.ageDays}d (${oldest.stage})` : 'Oldest Batch: -';
+
+      // Quick metrics
+      document.getElementById('dash-flock-count').innerText = getTotalFlockCount().toLocaleString();
+
+      const latestSamples = flockBatches.filter(b => b.latestWeight);
+      if (latestSamples.length) {
+        const totalWeightedG = latestSamples.reduce((acc, b) => acc + (b.latestWeight.avgWeightG * b.currentCount), 0);
+        const totalBirds = latestSamples.reduce((acc, b) => acc + b.currentCount, 0);
+        const avgWeightAll = totalBirds ? Math.round(totalWeightedG / totalBirds) : 0;
+        document.getElementById('dash-avg-weight').innerText = avgWeightAll.toLocaleString();
+        if (oldest && oldest.latestWeight) {
+          const target = getTargetWeight(oldest.ageDays);
+          const diff = oldest.latestWeight.avgWeightG - target;
+          const el = document.getElementById('dash-weight-vs-target');
+          el.innerText = `${diff >= 0 ? '+' : ''}${diff}g vs ${target}g target (oldest batch)`;
+          el.className = `text-xs font-semibold mt-0.5 ${diff >= 0 ? 'text-teal-400' : 'text-amber-400'}`;
+        }
+      } else {
+        document.getElementById('dash-avg-weight').innerText = '0';
+        document.getElementById('dash-weight-vs-target').innerText = 'No weight samples yet';
+      }
+
+      const fcr = getFarmFCR();
+      document.getElementById('dash-fcr').innerText = fcr ? fcr.toFixed(2) : '-';
+
+      const feedStats = getFeedStats();
+      document.getElementById('dash-feed-inv').innerText = `${feedStats.total.toLocaleString()} kg`;
+      document.getElementById('dash-feed-alert').innerText = feedStats.isLow ? '⚠️ Low stock — reorder soon' : 'Stock healthy';
+
+      // Financial quick summary
+      const todayRev = db.finance.filter(f => f.date === todayStr && f.type === 'Revenue').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+      const todayExp = db.finance.filter(f => f.date === todayStr && f.type === 'Expense').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
+      const net = todayRev - todayExp;
+
+      document.getElementById('dash-today-rev').innerText = `${todayRev.toLocaleString()} KES`;
+      document.getElementById('dash-today-exp').innerText = `${todayExp.toLocaleString()} KES`;
+      const netElem = document.getElementById('dash-today-net');
+      netElem.innerText = `${net.toLocaleString()} KES`;
+      netElem.className = `text-xl font-bold ${net >= 0 ? 'text-teal-400' : 'text-rose-400'}`;
+
+      // Dashboard: flock batches at a glance
+      document.getElementById('dash-flock-batches').innerHTML = flockBatches.length
+        ? [...flockBatches].sort((a, b) => b.ageDays - a.ageDays).map(b => `
+            <div class="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
+              <p class="font-bold text-slate-100">${b.batchName}</p>
+              <span class="text-[10px] uppercase font-semibold bg-teal-900/50 text-teal-300 px-1.5 py-0.5 rounded">${b.stage}</span>
+              <div class="mt-2 grid grid-cols-2 gap-2 text-xs">
+                <div><p class="text-slate-400">AGE</p><p class="text-teal-400 font-bold text-base">${b.ageDays}d</p></div>
+                <div><p class="text-slate-400">COUNT</p><p class="text-slate-100 font-bold text-base">${b.currentCount}</p></div>
+                <div><p class="text-slate-400">LATEST WEIGHT</p><p class="text-slate-300">${b.latestWeight ? b.latestWeight.avgWeightG + 'g' : '—'}</p></div>
+                <div><p class="text-slate-400">TARGET</p><p class="text-slate-300">${b.targetWeight}g</p></div>
+              </div>
+            </div>
+          `).join('')
+        : '<p class="text-sm text-slate-400 sm:col-span-2 lg:col-span-3">No flock batches yet. Add one in Flock Management.</p>';
+
+      // Dashboard lists
+      const upcomingAct = db.activities.filter(a => !a.completed).slice(0, 4);
+      document.getElementById('dash-upcoming-activities').innerHTML = upcomingAct.length ? upcomingAct.map(a => `
+        <li class="py-2 flex justify-between items-center">
+          <div><p class="font-semibold text-slate-100">${a.title}</p><p class="text-xs text-slate-400">${a.date} ${a.time || ''}</p></div>
+          <span class="text-xs bg-neutral-800 text-slate-300 px-2 py-1 rounded">${a.completed ? 'Done' : 'Pending'}</span>
+        </li>
+      `).join('') : '<li class="py-2 text-slate-400">No scheduled activities</li>';
+
+      const upcomingTreat = [];
+      flockBatches.forEach(b => {
+        db.treatments.forEach(t => {
+          const logged = (db.treatmentLog || []).some(l => l.batchId === b.id && l.treatmentId === t.id);
+          if (!logged) {
+            upcomingTreat.push({ name: t.name, batchName: b.batchName, ageDays: t.ageDays, dueDate: addDays(b.arrivalDate, t.ageDays) });
+          }
+        });
+      });
+      upcomingTreat.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
+      const upcomingTreatTop = upcomingTreat.slice(0, 4);
+      document.getElementById('dash-upcoming-treatments').innerHTML = upcomingTreatTop.length ? upcomingTreatTop.map(t => `
+        <li class="py-2 flex justify-between items-center">
+          <div><p class="font-semibold text-slate-100">${t.name}</p><p class="text-xs text-slate-400">${t.batchName} · Due: ${t.dueDate} (Age ${t.ageDays}d)</p></div>
+          <span class="text-xs bg-cyan-900/50 text-cyan-300 px-2 py-1 rounded">Upcoming</span>
+        </li>
+      `).join('') : '<li class="py-2 text-slate-400">No upcoming treatments</li>';
+
+      // Profile form defaults
+      document.getElementById('prof-name').value = db.profile.name || '';
+      document.getElementById('prof-location').value = db.profile.location || '';
+      document.getElementById('prof-size').value = db.profile.size || '';
+      document.getElementById('prof-est-date').value = db.profile.estDate || '';
+      document.getElementById('prof-breed').value = db.profile.breed || '';
+      document.getElementById('prof-contact').value = db.profile.contact || '';
+
+      // Flock batch selects
+      populateBatchSelect(document.getElementById('mort-flock-select'), flockBatches);
+      populateBatchSelect(document.getElementById('growth-flock-select'), flockBatches);
+      populateBatchSelect(document.getElementById('treat-batch-view'), flockBatches, selectedTreatmentBatchId);
+      populateBatchSelect(document.getElementById('growth-batch-view'), flockBatches, selectedGrowthBatchId);
+      if (!selectedTreatmentBatchId && flockBatches.length) selectedTreatmentBatchId = flockBatches[0].id;
+      if (!selectedGrowthBatchId && flockBatches.length) selectedGrowthBatchId = flockBatches[0].id;
+
+      // Flock batches overview
+      document.getElementById('flock-batches-overview').innerHTML = flockBatches.length
+        ? [...flockBatches].sort((a, b) => a.arrivalDate.localeCompare(b.arrivalDate)).map(b => `
+            <div class="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
+              <div class="flex justify-between items-start">
+                <div>
+                  <p class="font-bold text-slate-100">${b.batchName}</p>
+                  <span class="text-[10px] uppercase font-semibold bg-teal-900/50 text-teal-300 px-1.5 py-0.5 rounded">${b.stage}</span>
+                  <p class="text-xs text-slate-400 mt-1">Breed: ${b.breed || '—'} · Placed: ${b.arrivalDate}</p>
+                </div>
+                <button onclick="deleteFlockBatch('${b.id}')" class="text-xs text-rose-400 hover:underline">Remove</button>
+              </div>
+              <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+                <div><p class="text-slate-400">AGE</p><p class="text-teal-400 font-bold text-base">${b.ageDays}d</p></div>
+                <div><p class="text-slate-400">CURRENT COUNT</p><p class="text-slate-100 font-bold text-base">${b.currentCount}</p></div>
+                <div><p class="text-slate-400">INITIAL COUNT</p><p class="text-slate-300">${b.initialCount}</p></div>
+                <div><p class="text-slate-400">MORTALITY</p><p class="text-rose-400">${b.mortalityTotal}</p></div>
+              </div>
+            </div>
+          `).join('')
+        : '<p class="text-sm text-slate-400 sm:col-span-2">No flock batches yet. Add your first batch using the form on the left.</p>';
+
+      const allMortalities = [];
+      flockBatches.forEach(b => (b.mortalities || []).forEach(m => allMortalities.push({ ...m, batchName: b.batchName })));
+      allMortalities.sort((a, b) => b.date.localeCompare(a.date));
+      document.getElementById('mortality-history').innerHTML = allMortalities.length
+        ? allMortalities.map(m => `<tr><td class="p-2">${m.date}</td><td class="p-2">${m.batchName}</td><td class="p-2">${m.count}</td><td class="p-2">${m.reason}</td></tr>`).join('')
+        : '<tr><td colspan="4" class="p-2 text-slate-400">No mortality records yet.</td></tr>';
+
+      // Activity list
+      document.getElementById('activity-list').innerHTML = db.activities.map(a => `
+        <li class="p-3 bg-neutral-800 rounded-lg border border-neutral-800 flex justify-between items-center">
+          <div>
+            <span class="font-semibold text-sm ${a.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${a.title}</span>
+            <p class="text-xs text-slate-400">${a.desc || ''} | Date: ${a.date} ${a.time || ''}</p>
+          </div>
+          <div class="flex items-center space-x-2">
+            <button onclick="toggleActivity('${a.id}')" class="text-xs ${a.completed ? 'bg-teal-900/40 text-teal-400' : 'bg-neutral-700 text-slate-300'} px-2 py-1 rounded">
+              ${a.completed ? 'Completed' : 'Mark Done'}
+            </button>
+            <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>
+          </div>
+        </li>
+      `).join('');
+
+      // Growth history table (for selected batch)
+      const growthForBatch = (db.growth.history || []).filter(g => g.batchId === selectedGrowthBatchId).sort((a, b) => a.ageDays - b.ageDays);
+      document.getElementById('growth-history').innerHTML = growthForBatch.length
+        ? growthForBatch.map(g => {
+            const target = getTargetWeight(g.ageDays);
+            const variance = g.avgWeightG - target;
+            return `<tr>
+              <td class="p-2">${g.date}</td>
+              <td class="p-2">${g.ageDays}</td>
+              <td class="p-2">${g.avgWeightG}g${g.sampleSize ? ` <span class="text-slate-500">(n=${g.sampleSize})</span>` : ''}</td>
+              <td class="p-2">${target}g</td>
+              <td class="p-2 font-semibold ${variance >= 0 ? 'text-teal-400' : 'text-amber-400'}">${variance >= 0 ? '+' : ''}${variance}g</td>
+            </tr>`;
+          }).join('')
+        : '<tr><td colspan="5" class="p-2 text-slate-400">No weight samples recorded yet for this batch.</td></tr>';
+
+      // Sales log
+      document.getElementById('sales-history').innerHTML = db.sales.length ? db.sales.map(s => `
+        <tr><td class="p-2">${s.date}</td><td class="p-2">${s.type || 'Live Birds (kg)'}</td><td class="p-2">${s.qty}</td><td class="p-2">${s.price} KES</td><td class="p-2 font-bold text-teal-400">${(s.qty * s.price).toLocaleString()} KES</td></tr>
+      `).join('') : '<tr><td colspan="5" class="p-2 text-slate-400">No sales recorded yet.</td></tr>';
+
+      // Feed logs
+      document.getElementById('feed-history').innerHTML = db.feed.inventory.map(f => `
+        <tr><td class="p-2">${f.date}</td><td class="p-2">${f.type}${f.note ? ` <span class="text-slate-500">(${f.note})</span>` : ''}</td><td class="p-2 font-bold ${f.mode === 'purchase' ? 'text-teal-400' : 'text-rose-400'}">${f.mode === 'purchase' ? '+' : '-'}${f.qty} kg</td><td class="p-2 uppercase text-xs">${f.mode}</td></tr>
+      `).join('');
+
+      // Feed formulation: ingredient stock table
+      document.getElementById('ingredient-stock-table').innerHTML = db.feed.ingredients.length
+        ? db.feed.ingredients.map(i => `
+            <tr><td class="p-2">${i.name}</td><td class="p-2">${i.qty.toFixed(1)}</td><td class="p-2">${i.costPerKg.toFixed(2)} KES</td></tr>
+          `).join('')
+        : `<tr><td colspan="3" class="p-3 text-center text-slate-400">No raw ingredients recorded yet.</td></tr>`;
+
+      document.getElementById('ingredient-name-options').innerHTML = db.feed.ingredients.map(i => `<option value="${i.name}"></option>`).join('');
+
+      // Feed formulation: saved formulas table
+      document.getElementById('formula-list-table').innerHTML = db.feed.formulas.length
+        ? db.feed.formulas.map(f => {
+            const composition = f.components.map(c => `${c.ingredient} ${c.percent}%`).join(', ');
+            const cost = getFormulaCostPerKg(f);
+            return `<tr>
+              <td class="p-2 font-semibold text-slate-100">${f.name}</td>
+              <td class="p-2">${composition}</td>
+              <td class="p-2">${cost.toFixed(2)} KES</td>
+              <td class="p-2"><button onclick="deleteFormula('${f.id}')" class="text-rose-400 hover:underline text-xs">Delete</button></td>
+            </tr>`;
+          }).join('')
+        : `<tr><td colspan="4" class="p-3 text-center text-slate-400">No formulas saved yet — build one on the left.</td></tr>`;
+
+      // Feed formulation: mix-a-batch formula dropdown
+      const mixSelect = document.getElementById('mix-formula-select');
+      if (mixSelect) {
+        const prevMixVal = mixSelect.value;
+        mixSelect.innerHTML = db.feed.formulas.length
+          ? db.feed.formulas.map(f => `<option value="${f.id}">${f.name}</option>`).join('')
+          : `<option value="">No formulas yet — build one first</option>`;
+        if (db.feed.formulas.some(f => f.id === prevMixVal)) mixSelect.value = prevMixVal;
+      }
+
+      // Record Daily Consumption: feed-type dropdown (commercial purchases + self-formulated batches)
+      const consSelect = document.getElementById('feed-c-type');
+      if (consSelect) {
+        const prevConsVal = consSelect.value;
+        const knownTypes = Array.from(new Set([
+          ...db.feed.inventory.map(f => f.type),
+          ...db.feed.formulas.map(f => f.name),
+          'Broiler Starter Mash', 'Broiler Grower Mash', 'Broiler Finisher Mash'
+        ]));
+        consSelect.innerHTML = knownTypes.map(t => `<option value="${t}">${t}</option>`).join('');
+        if (knownTypes.includes(prevConsVal)) consSelect.value = prevConsVal;
+      }
+
+      // Treatment schedule & log (for selected batch)
+      const treatBatch = flockBatches.find(b => b.id === selectedTreatmentBatchId);
+      if (treatBatch) {
+        const rows = [...db.treatments].sort((a, b) => a.ageDays - b.ageDays).map(t => {
+          const dueDate = addDays(treatBatch.arrivalDate, t.ageDays);
+          const logEntry = (db.treatmentLog || []).find(l => l.batchId === treatBatch.id && l.treatmentId === t.id);
+          const isDone = !!logEntry;
+          const isOverdue = !isDone && dueDate < todayStr;
+          let statusHtml = isDone
+            ? `<span class="text-xs bg-teal-900/50 text-teal-300 px-2 py-1 rounded">Done ${logEntry.completedDate}</span>`
+            : isOverdue
+              ? `<span class="text-xs bg-rose-900/50 text-rose-300 px-2 py-1 rounded">Overdue</span>`
+              : `<span class="text-xs bg-cyan-900/50 text-cyan-300 px-2 py-1 rounded">Upcoming</span>`;
+          return `<tr>
+            <td class="p-2">${t.name} <span class="text-slate-500">(${t.type})</span></td>
+            <td class="p-2">${t.ageDays}d</td>
+            <td class="p-2">${dueDate}</td>
+            <td class="p-2">${statusHtml}</td>
+            <td class="p-2">${isDone ? '' : `<button onclick="markTreatmentDone('${treatBatch.id}','${t.id}')" class="text-xs text-teal-400 hover:underline">Mark Done</button>`}</td>
+          </tr>`;
+        }).join('');
+        document.getElementById('treatment-list').innerHTML = rows || '<tr><td colspan="5" class="p-2 text-slate-400">No treatment plans yet.</td></tr>';
+      } else {
+        document.getElementById('treatment-list').innerHTML = '<tr><td colspan="5" class="p-2 text-slate-400">Add a flock batch first to see its treatment schedule.</td></tr>';
+      }
+
+      // Finance log
+      document.getElementById('finance-history').innerHTML = db.finance.length
+        ? [...db.finance].sort((a, b) => b.date.localeCompare(a.date)).map(f => `
+          <tr>
+            <td class="p-2">${f.date}</td>
+            <td class="p-2 font-semibold ${f.type === 'Revenue' ? 'text-teal-400' : 'text-rose-400'}">${f.type}</td>
+            <td class="p-2">${f.category}</td>
+            <td class="p-2">${parseFloat(f.amount).toLocaleString()} KES</td>
+            <td class="p-2 text-slate-400">${f.desc || ''}</td>
+          </tr>
+        `).join('')
+        : '<tr><td colspan="5" class="p-2 text-slate-400">No transactions recorded yet.</td></tr>';
+
+      renderCharts();
+      if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Profile / Activities
+    // ---------------------------------------------------------------------
+    function saveProfile(e) {
+      e.preventDefault();
+      db.profile = {
+        name: document.getElementById('prof-name').value,
+        location: document.getElementById('prof-location').value,
+        size: document.getElementById('prof-size').value,
+        estDate: document.getElementById('prof-est-date').value,
+        breed: document.getElementById('prof-breed').value,
+        contact: document.getElementById('prof-contact').value
+      };
+      saveDB();
+    }
+
+    function addActivity(e) {
+      e.preventDefault();
+      db.activities.push({
+        id: Date.now().toString(),
+        title: document.getElementById('act-title').value,
+        desc: document.getElementById('act-desc').value,
+        date: document.getElementById('act-date').value,
+        time: document.getElementById('act-time').value,
+        completed: false
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('act-date').value = todayStr;
+    }
+
+    function toggleActivity(id) {
+      const a = db.activities.find(x => x.id === id);
+      if (a) a.completed = !a.completed;
+      saveDB();
+    }
+
+    function deleteActivity(id) {
+      db.activities = db.activities.filter(x => x.id !== id);
+      saveDB();
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Flock Management
+    // ---------------------------------------------------------------------
+    function addFlockBatch(e) {
+      e.preventDefault();
+      db.flocks.push({
+        id: 'batch-' + Date.now().toString(),
+        batchName: document.getElementById('flock-name-input').value,
+        breed: document.getElementById('flock-breed-input').value,
+        initialCount: parseInt(document.getElementById('flock-count-input').value),
+        arrivalDate: document.getElementById('flock-arrival-date').value,
+        mortalities: []
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('flock-arrival-date').value = todayStr;
+    }
+
+    function deleteFlockBatch(id) {
+      db.flocks = db.flocks.filter(f => f.id !== id);
+      db.growth.history = (db.growth.history || []).filter(g => g.batchId !== id);
+      db.treatmentLog = (db.treatmentLog || []).filter(l => l.batchId !== id);
+      if (selectedTreatmentBatchId === id) selectedTreatmentBatchId = null;
+      if (selectedGrowthBatchId === id) selectedGrowthBatchId = null;
+      saveDB();
+    }
+
+    function recordMortality(e) {
+      e.preventDefault();
+      const batchId = document.getElementById('mort-flock-select').value;
+      const batch = db.flocks.find(f => f.id === batchId);
+      if (!batch) { alert('Please select a flock batch.'); return; }
+      batch.mortalities = batch.mortalities || [];
+      batch.mortalities.push({
+        date: document.getElementById('mort-date').value,
+        count: parseInt(document.getElementById('mort-count').value),
+        reason: document.getElementById('mort-reason').value
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('mort-date').value = todayStr;
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Growth & Weight Tracking
+    // ---------------------------------------------------------------------
+    function addGrowthRecord(e) {
+      e.preventDefault();
+      const batchId = document.getElementById('growth-flock-select').value;
+      const batch = db.flocks.find(f => f.id === batchId);
+      if (!batch) { alert('Please select a flock batch.'); return; }
+      const date = document.getElementById('growth-date').value;
+      const ageDays = Math.max(0, calculateDaysDifference(batch.arrivalDate, date));
+      db.growth.history.push({
+        batchId,
+        date,
+        ageDays,
+        avgWeightG: parseFloat(document.getElementById('growth-weight').value),
+        sampleSize: parseInt(document.getElementById('growth-sample').value) || null
+      });
+      selectedGrowthBatchId = batchId;
+      saveDB();
+      e.target.reset();
+      document.getElementById('growth-date').value = todayStr;
+    }
+
+    function onGrowthBatchChange(id) {
+      selectedGrowthBatchId = id || null;
+      renderApp();
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Sales
+    // ---------------------------------------------------------------------
+    function addSale(e) {
+      e.preventDefault();
+      db.sales.unshift({
+        id: Date.now().toString(),
+        date: document.getElementById('sale-date').value,
+        type: document.getElementById('sale-type').value,
+        qty: parseFloat(document.getElementById('sale-qty').value),
+        price: parseFloat(document.getElementById('sale-price').value)
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('sale-date').value = todayStr;
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Feed
+    // ---------------------------------------------------------------------
+    function addFeedPurchase(e) {
+      e.preventDefault();
+      db.feed.inventory.unshift({
+        date: document.getElementById('feed-p-date').value,
+        type: document.getElementById('feed-p-type').value,
+        qty: parseInt(document.getElementById('feed-p-qty').value),
+        mode: 'purchase'
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('feed-p-date').value = todayStr;
+    }
+
+    function addFeedConsumption(e) {
+      e.preventDefault();
+      db.feed.inventory.unshift({
+        date: document.getElementById('feed-c-date').value,
+        type: document.getElementById('feed-c-type').value,
+        qty: parseInt(document.getElementById('feed-c-qty').value),
+        mode: 'consumed'
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('feed-c-date').value = todayStr;
+    }
+
+    function addFeedIngredient(e) {
+      e.preventDefault();
+      const name = document.getElementById('feed-ing-name').value.trim();
+      const qty = parseFloat(document.getElementById('feed-ing-qty').value);
+      const costPerKg = parseFloat(document.getElementById('feed-ing-cost').value);
+      const existing = db.feed.ingredients.find(i => i.name.toLowerCase() === name.toLowerCase());
+      if (existing) {
+        const newTotalQty = existing.qty + qty;
+        existing.costPerKg = ((existing.qty * existing.costPerKg) + (qty * costPerKg)) / newTotalQty;
+        existing.qty = newTotalQty;
+      } else {
+        db.feed.ingredients.push({ name, qty, costPerKg });
+      }
+      saveDB();
+      e.target.reset();
+      document.getElementById('feed-ing-date').value = todayStr;
+    }
+
+    let formulaRowCount = 0;
+    function addFormulaRow() {
+      formulaRowCount++;
+      const rowId = 'formula-row-' + formulaRowCount;
+      const container = document.getElementById('formula-rows');
+      const row = document.createElement('div');
+      row.id = rowId;
+      row.className = 'flex items-center gap-2';
+      const ingredientOptions = db.feed.ingredients.map(i => `<option value="${i.name}">${i.name}</option>`).join('');
+      row.innerHTML = `
+        <select class="formula-ingredient flex-1 border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-xs">
+          <option value="">Select ingredient</option>
+          ${ingredientOptions}
+        </select>
+        <input type="number" step="0.1" min="0" max="100" placeholder="%" class="formula-percent w-20 border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-xs" oninput="updateFormulaTotal()">
+        <button type="button" onclick="document.getElementById('${rowId}').remove(); updateFormulaTotal();" class="text-rose-400 hover:underline text-xs">✕</button>
+      `;
+      container.appendChild(row);
+      updateFormulaTotal();
+    }
+
+    function updateFormulaTotal() {
+      const percents = Array.from(document.querySelectorAll('.formula-percent')).map(el => parseFloat(el.value) || 0);
+      const total = percents.reduce((a, b) => a + b, 0);
+      const el = document.getElementById('formula-total-pct');
+      if (el) {
+        el.innerText = `Total: ${total}%`;
+        el.className = `text-xs font-semibold ${Math.abs(total - 100) < 0.01 ? 'text-teal-400' : 'text-cyan-400'}`;
+      }
+    }
+
+    function saveFormula() {
+      const name = document.getElementById('formula-name').value.trim();
+      if (!name) { alert('Please give the formula a name.'); return; }
+      const rows = Array.from(document.querySelectorAll('#formula-rows > div'));
+      const components = rows.map(row => {
+        const ingredient = row.querySelector('.formula-ingredient').value;
+        const percent = parseFloat(row.querySelector('.formula-percent').value) || 0;
+        return { ingredient, percent };
+      }).filter(c => c.ingredient && c.percent > 0);
+
+      if (!components.length) { alert('Add at least one ingredient line with a percentage.'); return; }
+      const total = components.reduce((a, c) => a + c.percent, 0);
+      if (Math.abs(total - 100) > 0.5) { alert(`Ingredient percentages should add up to 100% (currently ${total}%).`); return; }
+
+      db.feed.formulas.push({ id: Date.now().toString(), name, components });
+      saveDB();
+      document.getElementById('formula-name').value = '';
+      document.getElementById('formula-rows').innerHTML = '';
+    }
+
+    function deleteFormula(id) {
+      db.feed.formulas = db.feed.formulas.filter(f => f.id !== id);
+      saveDB();
+    }
+
+    function getFormulaCostPerKg(formula) {
+      return formula.components.reduce((sum, c) => {
+        const ing = db.feed.ingredients.find(i => i.name === c.ingredient);
+        const cost = ing ? ing.costPerKg : 0;
+        return sum + (cost * (c.percent / 100));
+      }, 0);
+    }
+
+    function previewMix() {
+      const formulaId = document.getElementById('mix-formula-select').value;
+      const qty = parseFloat(document.getElementById('mix-qty').value) || 0;
+      const preview = document.getElementById('mix-preview');
+      const formula = db.feed.formulas.find(f => f.id === formulaId);
+      if (!formula || !qty) {
+        preview.innerHTML = 'Select a formula and enter a batch size to see ingredient needs.';
+        return;
+      }
+
+      const lines = formula.components.map(c => {
+        const needed = (c.percent / 100) * qty;
+        const ing = db.feed.ingredients.find(i => i.name === c.ingredient);
+        const available = ing ? ing.qty : 0;
+        const short = needed > available;
+        return `<div class="flex justify-between ${short ? 'text-rose-400 font-semibold' : ''}">
+          <span>${c.ingredient} (${c.percent}%)</span>
+          <span>${needed.toFixed(1)}kg needed · ${available.toFixed(1)}kg in stock${short ? ' ⚠️' : ''}</span>
+        </div>`;
+      }).join('');
+
+      const costPerKg = getFormulaCostPerKg(formula);
+      preview.innerHTML = lines + `<div class="pt-2 mt-2 border-t border-neutral-700 flex justify-between font-semibold text-slate-200">
+        <span>Est. cost</span><span>${(costPerKg * qty).toLocaleString(undefined, { maximumFractionDigits: 0 })} KES (${costPerKg.toFixed(2)}/kg)</span>
+      </div>`;
+    }
+
+    function mixFormulaBatch() {
+      const formulaId = document.getElementById('mix-formula-select').value;
+      const qty = parseFloat(document.getElementById('mix-qty').value);
+      const date = document.getElementById('mix-date').value || todayStr;
+      const formula = db.feed.formulas.find(f => f.id === formulaId);
+
+      if (!formula) { alert('Please select a formula.'); return; }
+      if (!qty || qty <= 0) { alert('Enter a valid batch size in kg.'); return; }
+
+      const needs = formula.components.map(c => ({
+        ingredient: c.ingredient,
+        needed: (c.percent / 100) * qty
+      }));
+      const shortages = needs.filter(n => {
+        const ing = db.feed.ingredients.find(i => i.name === n.ingredient);
+        return !ing || ing.qty < n.needed - 0.001;
+      });
+      if (shortages.length) {
+        alert(`Not enough stock for: ${shortages.map(s => s.ingredient).join(', ')}. Add more ingredient stock or reduce the batch size.`);
+        return;
+      }
+
+      // Deduct the required amount of each ingredient from stock
+      let totalCost = 0;
+      needs.forEach(n => {
+        const ing = db.feed.ingredients.find(i => i.name === n.ingredient);
+        ing.qty -= n.needed;
+        totalCost += n.needed * ing.costPerKg;
+      });
+
+      // Add the finished, self-mixed batch straight into feed inventory
+      db.feed.inventory.unshift({ date, type: formula.name, qty, mode: 'purchase', note: 'Self-formulated' });
+
+      saveDB();
+      document.getElementById('mix-qty').value = '';
+      previewMix();
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Treatment Schedule
+    // ---------------------------------------------------------------------
+    function populateTreatmentPresets() {
+      const select = document.getElementById('treat-preset');
+      if (!select) return;
+      PRESET_TREATMENTS.forEach((t, i) => {
+        const opt = document.createElement('option');
+        opt.value = i;
+        opt.textContent = `${t.name} — Day ${t.ageDays} (${t.type})`;
+        select.appendChild(opt);
+      });
+    }
+
+    function applyTreatmentPreset(index) {
+      if (index === '' || index === null || index === undefined) return;
+      const t = PRESET_TREATMENTS[parseInt(index)];
+      if (!t) return;
+      document.getElementById('treat-name').value = t.name;
+      document.getElementById('treat-type').value = t.type;
+      document.getElementById('treat-age').value = t.ageDays;
+    }
+
+    function addTreatmentPlan(e) {
+      e.preventDefault();
+      db.treatments.push({
+        id: Date.now().toString(),
+        name: document.getElementById('treat-name').value,
+        type: document.getElementById('treat-type').value,
+        ageDays: parseInt(document.getElementById('treat-age').value)
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('treat-preset').value = '';
+    }
+
+    function markTreatmentDone(batchId, treatmentId) {
+      db.treatmentLog = db.treatmentLog || [];
+      const existing = db.treatmentLog.find(l => l.batchId === batchId && l.treatmentId === treatmentId);
+      if (existing) {
+        existing.completedDate = todayStr;
+      } else {
+        db.treatmentLog.push({ batchId, treatmentId, completedDate: todayStr });
+      }
+      saveDB();
+    }
+
+    function onTreatmentBatchChange(id) {
+      selectedTreatmentBatchId = id || null;
+      renderApp();
+    }
+
+    // ---------------------------------------------------------------------
+    // Form handlers — Financial Tracking
+    // ---------------------------------------------------------------------
+    function addTransaction(e) {
+      e.preventDefault();
+      db.finance.unshift({
+        id: Date.now().toString(),
+        type: document.getElementById('fin-type').value,
+        category: document.getElementById('fin-cat').value,
+        amount: parseFloat(document.getElementById('fin-amount').value),
+        date: document.getElementById('fin-date').value,
+        desc: document.getElementById('fin-desc').value
+      });
+      saveDB();
+      e.target.reset();
+      document.getElementById('fin-date').value = todayStr;
+    }
+
+    // ---------------------------------------------------------------------
+    // Initialization
+    // ---------------------------------------------------------------------
+    document.getElementById('act-date').value = todayStr;
+    document.getElementById('mort-date').value = todayStr;
+    document.getElementById('growth-date').value = todayStr;
+    document.getElementById('sale-date').value = todayStr;
+    document.getElementById('feed-p-date').value = todayStr;
+    document.getElementById('feed-c-date').value = todayStr;
+    document.getElementById('feed-ing-date').value = todayStr;
+    document.getElementById('mix-date').value = todayStr;
+    document.getElementById('fin-date').value = todayStr;
+    document.getElementById('flock-arrival-date').value = todayStr;
+
+    // Populate the standard treatment presets dropdown
+    populateTreatmentPresets();
+
+    // Initial App Render
+    renderApp();
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+  </script>
+</body>
+</html>
