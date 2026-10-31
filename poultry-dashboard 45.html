@@ -4,485 +4,698 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Farm Poultry Dashboard</title>
-  <!-- Tailwind CSS CDN for styling -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js for graph charts -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
-</head>
-<body class="bg-black text-slate-100 font-sans antialiased min-h-screen flex flex-col md:flex-row">
+  <style>
+    :root {
+      --bg: #050816;
+      --panel: #101827;
+      --panel-2: #0f172a;
+      --panel-3: #182335;
+      --line: #1f2b3d;
+      --text: #e5eefb;
+      --muted: #93a6bf;
+      --green: #22c55e;
+      --green-2: #16a34a;
+      --amber: #fbbf24;
+      --sky: #60a5fa;
+      --red: #f87171;
+      --slate: #cbd5e1;
+      --shadow: 0 10px 25px rgba(0,0,0,0.25);
+    }
 
-  <!-- Sidebar Navigation -->
-  <aside class="w-full md:w-64 bg-emerald-900 text-white flex-shrink-0 flex flex-col justify-between">
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+      min-height: 100%;
+    }
+    body {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    .sidebar {
+      width: 260px;
+      background: #0b3a2d;
+      color: white;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border-right: 1px solid rgba(255,255,255,0.08);
+    }
+    .brand {
+      padding: 24px 18px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-badge {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: rgba(251,191,36,0.15);
+      display: grid;
+      place-items: center;
+      color: #fbbf24;
+      font-size: 22px;
+    }
+    .brand h1 { margin: 0; font-size: 1.05rem; }
+    .brand small { color: #a7f3d0; }
+
+    .nav {
+      padding: 16px 12px;
+      display: grid;
+      gap: 6px;
+    }
+    .nav button {
+      border: 0;
+      background: transparent;
+      color: #d9f7ec;
+      text-align: left;
+      padding: 11px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav button.active {
+      background: rgba(16, 185, 129, 0.25);
+      color: white;
+    }
+    .nav button:hover {
+      background: rgba(255,255,255,0.06);
+    }
+    .sidebar-foot {
+      padding: 16px 18px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+      color: #a7f3d0;
+      font-size: 0.8rem;
+    }
+
+    .main {
+      flex: 1;
+      padding: 22px;
+    }
+    .view { display: none; }
+    .view.active { display: block; }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .topbar h2 {
+      margin: 0;
+      font-size: 2rem;
+    }
+    .tag {
+      background: rgba(13,148,136,0.24);
+      color: #a7f3d0;
+      display: inline-block;
+      padding: 7px 12px;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(180px, 1fr));
+      gap: 16px;
+      margin: 18px 0;
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(260px, 1fr)); gap: 18px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(200px, 1fr)); gap: 18px; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 18px;
+    }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 120px;
+    }
+    .metric .small {
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .metric .value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 0;
+      line-height: 1.1;
+    }
+    .metric .sub {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 4px;
+    }
+    .icon-box {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .green { color: var(--green); }
+    .amber { color: var(--amber); }
+    .blue { color: var(--sky); }
+    .red { color: var(--red); }
+
+    .card-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(150px, 1fr));
+      gap: 12px;
+      background: var(--panel-2);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+    }
+    .card-row .label { color: var(--muted); font-size: 0.72rem; text-transform: uppercase; }
+    .card-row .num { font-size: 1.4rem; font-weight: 800; }
+
+    .batch-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .batch-item {
+      background: #0d1726;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+    }
+    .batch-item strong { display: block; }
+
+    .chart-box {
+      height: 240px;
+      position: relative;
+      margin-top: 10px;
+    }
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: rgba(255,255,255,0.01);
+      border-radius: 10px;
+    }
+
+    h3 {
+      margin: 0 0 12px 0;
+      font-size: 1.1rem;
+    }
+    input, select, textarea, button {
+      font: inherit;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 0.74rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: #0b1220;
+      color: white;
+      outline: none;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(34,197,94,0.8);
+      box-shadow: 0 0 0 3px rgba(34,197,94,0.08);
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    form { display: grid; gap: 12px; }
+    .two-col {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(120px, 1fr));
+      gap: 12px;
+    }
+
+    .btn {
+      border: 0;
+      cursor: pointer;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      transition: 0.2s ease;
+    }
+    .btn-primary {
+      background: #166534;
+      color: white;
+    }
+    .btn-primary:hover { background: #14532d; }
+    .btn-danger {
+      background: #7f1d1d;
+      color: white;
+    }
+    .btn-danger:hover { background: #641919; }
+    .btn-secondary {
+      background: #1e293b;
+      color: white;
+    }
+    .btn-secondary:hover { background: #0f172a; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      color: var(--slate);
+    }
+    th, td {
+      border-bottom: 1px solid var(--line);
+      padding: 10px 8px;
+      text-align: left;
+      vertical-align: top;
+    }
+    th {
+      color: var(--muted);
+      text-transform: uppercase;
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+    }
+    .list { display: grid; gap: 10px; }
+    .list-item {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+    .list-item strong { display: block; }
+    .muted { color: var(--muted); }
+    .center { text-align: center; }
+
+    @media (max-width: 980px) {
+      body { display: block; }
+      .sidebar { width: 100%; }
+      .grid-4, .grid-2, .grid-3 {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    @media (max-width: 640px) {
+      .grid-4, .grid-2, .grid-3, .two-col, .card-row { grid-template-columns: 1fr; }
+      .main { padding: 16px; }
+      .topbar { display: block; }
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
     <div>
-      <div class="p-5 border-b border-emerald-800 flex items-center space-x-3">
-        <i data-lucide="egg" class="w-8 h-8 text-amber-400"></i>
+      <div class="brand">
+        <div class="brand-badge">🥚</div>
         <div>
-          <h1 class="font-bold text-lg leading-tight" id="nav-farm-name">Poultry Hub</h1>
-          <p class="text-xs text-emerald-300">Management Dashboard</p>
+          <h1 id="farmName">Poultry Hub</h1>
+          <small>Management Dashboard</small>
         </div>
       </div>
-      <nav class="p-3 space-y-1 text-sm font-medium">
-        <button onclick="switchTab('dashboard')" id="btn-dashboard" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg bg-emerald-800 text-white">
-          <i data-lucide="layout-dashboard" class="w-5 h-5"></i><span>Dashboard</span>
-        </button>
-        <button onclick="switchTab('flock')" id="btn-flock" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="bird" class="w-5 h-5"></i><span>Flock Management</span>
-        </button>
-        <button onclick="switchTab('egg')" id="btn-egg" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="egg" class="w-5 h-5"></i><span>Egg Production</span>
-        </button>
-        <button onclick="switchTab('sales')" id="btn-sales" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="shopping-cart" class="w-5 h-5"></i><span>Sales Management</span>
-        </button>
-        <button onclick="switchTab('feed')" id="btn-feed" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="wheat" class="w-5 h-5"></i><span>Feed Management</span>
-        </button>
-        <button onclick="switchTab('treatment')" id="btn-treatment" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="syringe" class="w-5 h-5"></i><span>Treatment Schedule</span>
-        </button>
-        <button onclick="switchTab('finance')" id="btn-finance" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="circle-dollar-sign" class="w-5 h-5"></i><span>Financial Tracking</span>
-        </button>
-        <button onclick="switchTab('activity')" id="btn-activity" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="calendar" class="w-5 h-5"></i><span>Activity Scheduler</span>
-        </button>
-        <button onclick="switchTab('profile')" id="btn-profile" class="nav-btn flex items-center space-x-3 w-full px-3 py-2.5 rounded-lg hover:bg-emerald-800/60 text-emerald-100">
-          <i data-lucide="user" class="w-5 h-5"></i><span>Farm Profile</span>
-        </button>
+      <nav class="nav">
+        <button class="active" data-tab="dashboard">📊 Dashboard</button>
+        <button data-tab="profile">🏡 Farm Profile</button>
+        <button data-tab="activity">🗓️ Activity Scheduler</button>
+        <button data-tab="flock">🐔 Flock Management</button>
+        <button data-tab="egg">🥚 Egg Production</button>
+        <button data-tab="sales">💸 Sales</button>
+        <button data-tab="feed">🌾 Feed</button>
+        <button data-tab="treatment">💉 Treatments</button>
+        <button data-tab="finance">📉 Finance</button>
       </nav>
     </div>
-    <div class="p-4 border-t border-emerald-800 text-xs text-emerald-300">
-      <p>Today: <span id="current-date-display" class="font-semibold text-white"></span></p>
+    <div class="sidebar-foot">
+      <div>Today: <strong id="todayLabel">-</strong></div>
     </div>
   </aside>
 
-  <!-- Main Content Area -->
-  <main class="flex-1 p-4 md:p-8 overflow-y-auto max-w-7xl">
-
-    <!-- 3.1 Dashboard Home -->
-    <section id="view-dashboard" class="space-y-6">
-      <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-        <h2 class="text-2xl font-bold text-slate-100">Dashboard Overview</h2>
-        <span class="text-sm bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded-full font-medium" id="dash-flock-age-tag">Flock Age: -</span>
+  <main class="main">
+    <section class="view active" id="view-dashboard">
+      <div class="topbar">
+        <h2>Dashboard Overview</h2>
+        <span class="tag" id="flockAgeTag">Flock Age: -</span>
       </div>
 
-      <!-- Quick Metrics Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+      <div class="grid-4">
+        <div class="panel metric">
           <div>
-            <p class="text-xs uppercase font-semibold text-slate-400">Current Flock Count</p>
-            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-flock-count">0</h3>
+            <div class="small">Current Flock Count</div>
+            <p class="value" id="dashFlockCount">0</p>
           </div>
-          <div class="bg-emerald-900/40 p-3 rounded-lg text-emerald-400"><i data-lucide="bird"></i></div>
+          <div class="icon-box" style="background: rgba(34,197,94,0.12); color: var(--green);">🐔</div>
         </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+
+        <div class="panel metric">
           <div>
-            <p class="text-xs uppercase font-semibold text-slate-400">Today's Egg Production</p>
-            <h3 class="text-2xl font-extrabold text-slate-100 mt-1"><span id="dash-egg-actual">0</span> / <span id="dash-egg-quota" class="text-base text-slate-400">0</span></h3>
-            <p class="text-xs font-semibold text-amber-400 mt-0.5" id="dash-egg-rate">0% Rate</p>
+            <div class="small">Today's Egg Production</div>
+            <p class="value" id="dashEggActual">0</p>
+            <div class="sub"><span id="dashQuota">0</span> quota</div>
           </div>
-          <div class="bg-amber-900/40 p-3 rounded-lg text-amber-400"><i data-lucide="egg"></i></div>
+          <div class="icon-box" style="background: rgba(251,191,36,0.12); color: var(--amber);">🥚</div>
         </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+
+        <div class="panel metric">
           <div>
-            <p class="text-xs uppercase font-semibold text-slate-400">Today's Crates Sold</p>
-            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-crates-sold">0</h3>
+            <div class="small">Today's Crates Sold</div>
+            <p class="value" id="dashCrates">0</p>
           </div>
-          <div class="bg-blue-900/40 p-3 rounded-lg text-blue-400"><i data-lucide="shopping-cart"></i></div>
+          <div class="icon-box" style="background: rgba(96,165,250,0.12); color: var(--sky);">🛒</div>
         </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm flex justify-between items-center">
+
+        <div class="panel metric">
           <div>
-            <p class="text-xs uppercase font-semibold text-slate-400">Feed Inventory</p>
-            <h3 class="text-2xl font-extrabold text-slate-100 mt-1" id="dash-feed-inv">0 kg</h3>
-            <p class="text-xs text-slate-400 mt-0.5" id="dash-feed-alert"></p>
+            <div class="small">Feed Inventory</div>
+            <p class="value" id="dashFeed">0 kg</p>
+            <div class="sub" id="feedStatus">Stock Healthy</div>
           </div>
-          <div class="bg-lime-900/40 p-3 rounded-lg text-lime-400"><i data-lucide="wheat"></i></div>
+          <div class="icon-box" style="background: rgba(163,230,53,0.12); color: #a3e635;">🌾</div>
         </div>
       </div>
 
-      <!-- Financial Quick Summary -->
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <span class="text-xs font-semibold text-slate-400 uppercase">Today's Revenue</span>
-          <p class="text-xl font-bold text-emerald-400" id="dash-today-rev">0 KES</p>
-        </div>
-        <div>
-          <span class="text-xs font-semibold text-slate-400 uppercase">Today's Expenses</span>
-          <p class="text-xl font-bold text-rose-400" id="dash-today-exp">0 KES</p>
-        </div>
-        <div>
-          <span class="text-xs font-semibold text-slate-400 uppercase">Net Profit / Loss</span>
-          <p class="text-xl font-bold" id="dash-today-net">0 KES</p>
-        </div>
-      </div>
-
-      <!-- Flock Batches at a Glance -->
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-          <i data-lucide="bird" class="w-5 h-5 text-emerald-400"></i>
-          <span>Flock Batches at a Glance</span>
-        </h3>
-        <div id="dash-flock-batches" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
-      </div>
-
-      <!-- Graph Charts Overview -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="line-chart" class="w-5 h-5 text-emerald-400"></i>
-            <span>Egg Production Trend (Recent)</span>
-          </h3>
-          <div class="relative h-56"><canvas id="chart-egg-trend"></canvas></div>
-        </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
-            <span>Revenue vs Expenses (Recent)</span>
-          </h3>
-          <div class="relative h-56"><canvas id="chart-finance-trend"></canvas></div>
+      <div class="panel" style="margin-bottom:18px;">
+        <div class="card-row">
+          <div>
+            <div class="label">Today's Revenue</div>
+            <div class="num green" id="dashRevenue">KES 0</div>
+          </div>
+          <div>
+            <div class="label">Today's Expenses</div>
+            <div class="num red" id="dashExpenses">KES 0</div>
+          </div>
+          <div>
+            <div class="label">Net Profit / Loss</div>
+            <div class="num" id="dashNet">KES 0</div>
+          </div>
         </div>
       </div>
 
-      <!-- Upcoming Activities & Treatments -->
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="calendar" class="w-5 h-5 text-emerald-400"></i>
-            <span>Upcoming Activities (Next 7 Days)</span>
-          </h3>
-          <ul class="divide-y divide-neutral-800 text-sm" id="dash-upcoming-activities"></ul>
+      <div class="grid-2" style="margin-bottom: 20px;">
+        <div class="panel">
+          <h3>Flock Batches at a Glance</h3>
+          <div class="batch-grid" id="batchOverview"></div>
         </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="syringe" class="w-5 h-5 text-emerald-400"></i>
-            <span>Upcoming Treatments</span>
-          </h3>
-          <ul class="divide-y divide-neutral-800 text-sm" id="dash-upcoming-treatments"></ul>
+        <div class="panel">
+          <h3>Upcoming Activities</h3>
+          <div class="list" id="activityList"></div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Egg Production Trend</h3>
+          <div class="chart-box"><canvas id="chartEgg"></canvas></div>
+        </div>
+        <div class="panel">
+          <h3>Revenue vs Expenses</h3>
+          <div class="chart-box"><canvas id="chartFinance"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- 3.2 Farm Profile -->
-    <section id="view-profile" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Farm Profile</h2>
-      <div class="bg-neutral-900 p-6 rounded-xl border border-neutral-800 shadow-sm max-w-2xl">
-        <form id="form-profile" onsubmit="saveProfile(event)" class="space-y-4">
+    <section class="view" id="view-profile">
+      <div class="topbar"><h2>Farm Profile</h2></div>
+      <div class="panel" style="max-width:700px;">
+        <form id="frmProfile">
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Farm Name</label>
-            <input type="text" id="prof-name" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            <label>Farm Name</label>
+            <input type="text" id="profileName" required />
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Location</label>
-            <input type="text" id="prof-location" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            <label>Location</label>
+            <input type="text" id="profileLocation" required />
           </div>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="two-col">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Farm Size (e.g. Acres/Sqm)</label>
-              <input type="text" id="prof-size" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label>Farm Size</label>
+              <input type="text" id="profileSize" />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Establishment Date</label>
-              <input type="date" id="prof-est-date" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label>Establishment Date</label>
+              <input type="date" id="profileEstDate" />
             </div>
           </div>
           <div>
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Contact Information</label>
-            <input type="text" id="prof-contact" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            <label>Contact Information</label>
+            <input type="text" id="profileContact" />
           </div>
-          <button type="submit" class="bg-emerald-700 hover:bg-emerald-800 text-white font-medium px-5 py-2.5 rounded-lg text-sm">Save Profile</button>
+          <button class="btn btn-primary" type="submit">Save Profile</button>
         </form>
       </div>
     </section>
 
-    <!-- 3.3 Activity Scheduler -->
-    <section id="view-activity" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Activity Scheduler</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-100 mb-4">Schedule Activity</h3>
-          <form id="form-activity" onsubmit="addActivity(event)" class="space-y-3">
+    <section class="view" id="view-activity">
+      <div class="topbar"><h2>Activity Scheduler</h2></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Add Activity</h3>
+          <form id="frmActivity">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Title</label>
-              <input type="text" id="act-title" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Title</label>
+              <input type="text" id="actTitle" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
-              <textarea id="act-desc" rows="2" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></textarea>
+              <label>Description</label>
+              <textarea id="actDesc"></textarea>
             </div>
-            <div class="grid grid-cols-2 gap-2">
+            <div class="two-col">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-                <input type="date" id="act-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Date</label>
+                <input type="date" id="actDate" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Time</label>
-                <input type="time" id="act-time" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Time</label>
+                <input type="time" id="actTime" />
               </div>
             </div>
-            <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 rounded-lg text-sm mt-2">Add Activity</button>
+            <button class="btn btn-primary" type="submit">Add Activity</button>
           </form>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-4">Scheduled Activities</h3>
-          <ul id="activity-list" class="space-y-3"></ul>
+        <div class="panel">
+          <h3>Scheduled Activities</h3>
+          <div class="list" id="scheduledActivities"></div>
         </div>
       </div>
     </section>
 
-    <!-- 3.4 Flock Management -->
-    <section id="view-flock" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Flock Management</h2>
-      <p class="text-sm text-slate-400 -mt-4">Track multiple flock batches separately — each batch keeps its own arrival date, so you always know exactly how old each group of birds is.</p>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-4">Add Flock Batch</h3>
-            <form id="form-flock" onsubmit="addFlockBatch(event)" class="space-y-3">
+    <section class="view" id="view-flock">
+      <div class="topbar"><h2>Flock Management</h2></div>
+      <div class="grid-2">
+        <div>
+          <div class="panel" style="margin-bottom:18px;">
+            <h3>Add Flock Batch</h3>
+            <form id="frmFlock">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Batch Name / Label</label>
-                <input type="text" id="flock-name-input" placeholder="e.g. Batch A - Layers" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Batch Name / Label</label>
+                <input type="text" id="flockName" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Initial Count</label>
-                <input type="number" id="flock-count-input" min="1" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Initial Count</label>
+                <input type="number" id="flockCount" min="1" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Arrival Date</label>
-                <input type="date" id="flock-arrival-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Arrival Date</label>
+                <input type="date" id="flockDate" required />
               </div>
-              <button type="submit" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-medium py-2 rounded-lg text-sm">Add Batch</button>
+              <button class="btn btn-primary" type="submit">Add Batch</button>
             </form>
           </div>
 
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-4">Record Mortality / Reduction</h3>
-            <form id="form-mortality" onsubmit="recordMortality(event)" class="space-y-3">
+          <div class="panel">
+            <h3>Record Mortality / Reduction</h3>
+            <form id="frmMortality">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Flock Batch</label>
-                <select id="mort-flock-select" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm"></select>
+                <label>Flock Batch</label>
+                <select id="mortBatch"></select>
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Number of Birds</label>
-                <input type="number" id="mort-count" min="1" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Number of Birds</label>
+                <input type="number" id="mortCount" min="1" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Reason</label>
-                <input type="text" id="mort-reason" placeholder="e.g. Illness, culling" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Reason</label>
+                <input type="text" id="mortReason" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-                <input type="date" id="mort-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Date</label>
+                <input type="date" id="mortDate" required />
               </div>
-              <button type="submit" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2 rounded-lg text-sm">Record Mortality</button>
+              <button class="btn btn-danger" type="submit">Record Mortality</button>
             </form>
           </div>
         </div>
 
-        <div class="lg:col-span-2 space-y-6">
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <div class="flex justify-between items-center mb-4">
-              <h3 class="font-bold text-slate-100">Flock Batches & Ages</h3>
-              <button onclick="confirmResetFlock()" class="text-xs text-rose-400 hover:underline">Clear All Batches</button>
-            </div>
-            <div id="flock-batches-overview" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-          </div>
-
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-              <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
-              <span>Batch Age Comparison</span>
-            </h3>
-            <div class="relative h-64"><canvas id="chart-flock-ages"></canvas></div>
-          </div>
-
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h4 class="font-semibold text-slate-300 text-sm mb-2">Mortality & Change History (All Batches)</h4>
-            <div class="overflow-x-auto">
-              <table class="w-full text-left text-xs text-slate-300">
-                <thead class="bg-neutral-800 uppercase text-slate-400">
-                  <tr><th class="p-2">Date</th><th class="p-2">Flock Batch</th><th class="p-2">Birds Removed</th><th class="p-2">Reason</th></tr>
-                </thead>
-                <tbody id="mortality-history" class="divide-y divide-neutral-800"></tbody>
-              </table>
-            </div>
-          </div>
+        <div class="panel">
+          <h3>Flock Batches & Ages</h3>
+          <div id="flockList" class="list"></div>
+          <div class="chart-box" style="height:170px; margin-top:20px;"><canvas id="chartFlockAge"></canvas></div>
         </div>
       </div>
     </section>
 
-    <!-- 3.5 Egg Production Tracking -->
-    <section id="view-egg" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Egg Production Tracking</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-3">Daily Quota Setting</h3>
-            <form onsubmit="saveEggQuota(event)" class="flex gap-2">
-              <input type="number" id="egg-quota-input" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm" placeholder="e.g. 400">
-              <button type="submit" class="bg-emerald-700 text-white px-4 rounded-lg text-sm font-medium">Save</button>
+    <section class="view" id="view-egg">
+      <div class="topbar"><h2>Egg Production Tracking</h2></div>
+      <div class="grid-2">
+        <div>
+          <div class="panel" style="margin-bottom:18px;">
+            <h3>Daily Quota</h3>
+            <form id="frmQuota">
+              <div>
+                <label>Target Eggs</label>
+                <input type="number" id="quotaInput" required />
+              </div>
+              <button class="btn btn-primary" type="submit">Save Quota</button>
             </form>
           </div>
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-3">Record Daily Production</h3>
-            <form onsubmit="addEggProduction(event)" class="space-y-3">
+
+          <div class="panel">
+            <h3>Record Daily Production</h3>
+            <form id="frmEggRecord">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Actual Eggs Collected</label>
-                <input type="number" id="egg-actual-input" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Actual Eggs Collected</label>
+                <input type="number" id="eggActual" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-                <input type="date" id="egg-date-input" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Date</label>
+                <input type="date" id="eggDate" required />
               </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Production</button>
+              <button class="btn btn-primary" type="submit">Record Production</button>
             </form>
           </div>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-4">Production History</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-neutral-800 uppercase text-slate-400">
-                <tr><th class="p-2">Date</th><th class="p-2">Actual Eggs</th><th class="p-2">Quota</th><th class="p-2">Production Rate</th></tr>
-              </thead>
-              <tbody id="egg-history" class="divide-y divide-neutral-800"></tbody>
-            </table>
-          </div>
+
+        <div class="panel">
+          <h3>Production History</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Actual</th><th>Quota</th><th>Rate</th></tr>
+            </thead>
+            <tbody id="eggHistoryBody"></tbody>
+          </table>
+          <div class="chart-box" style="height:220px; margin-top:18px;"><canvas id="chartEggFull"></canvas></div>
         </div>
-      </div>
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-          <i data-lucide="line-chart" class="w-5 h-5 text-emerald-400"></i>
-          <span>Egg Production vs Quota Trend</span>
-        </h3>
-        <div class="relative h-72"><canvas id="chart-egg-full"></canvas></div>
       </div>
     </section>
 
-    <!-- 3.6 Sales Management -->
-    <section id="view-sales" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Sales Management</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-100 mb-3">Record Crate Sales</h3>
-          <form onsubmit="addSale(event)" class="space-y-3">
+    <section class="view" id="view-sales">
+      <div class="topbar"><h2>Sales Management</h2></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Record Crate Sales</h3>
+          <form id="frmSale">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Crates Sold</label>
-              <input type="number" id="sale-crates" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Crates Sold</label>
+              <input type="number" id="saleCrates" min="1" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Price Per Crate (KES)</label>
-              <input type="number" id="sale-price" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Price Per Crate (KES)</label>
+              <input type="number" id="salePrice" min="1" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-              <input type="date" id="sale-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Date</label>
+              <input type="date" id="saleDate" required />
             </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Sale Entry</button>
+            <button class="btn btn-primary" type="submit">Save Sale</button>
           </form>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-4">Sales Log</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-neutral-800 uppercase text-slate-400">
-                <tr><th class="p-2">Date</th><th class="p-2">Crates</th><th class="p-2">Price/Crate</th><th class="p-2">Total Revenue</th></tr>
-              </thead>
-              <tbody id="sales-history" class="divide-y divide-neutral-800"></tbody>
-            </table>
-          </div>
+        <div class="panel">
+          <h3>Sales Log</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Crates</th><th>Price</th><th>Total</th></tr>
+            </thead>
+            <tbody id="salesHistoryBody"></tbody>
+          </table>
+          <div class="chart-box" style="height:200px; margin-top:18px;"><canvas id="chartSales"></canvas></div>
         </div>
-      </div>
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-          <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
-          <span>Crates Sold & Revenue Trend</span>
-        </h3>
-        <div class="relative h-72"><canvas id="chart-sales"></canvas></div>
       </div>
     </section>
 
-    <!-- 3.7 Feed Management -->
-    <section id="view-feed" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Feed Management</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="space-y-6">
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-3">Add Purchased Feed</h3>
-            <form onsubmit="addFeedPurchase(event)" class="space-y-3">
+    <section class="view" id="view-feed">
+      <div class="topbar"><h2>Feed Management</h2></div>
+      <div class="grid-2">
+        <div>
+          <div class="panel" style="margin-bottom:18px;">
+            <h3>Add Purchased Feed</h3>
+            <form id="frmFeedPurchase">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Feed Type</label>
-                <input type="text" id="feed-p-type" placeholder="e.g. Layers Mash" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Feed Type</label>
+                <input type="text" id="feedType" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Quantity (kg)</label>
-                <input type="number" id="feed-p-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Quantity (kg)</label>
+                <input type="number" id="feedQty" min="1" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-                <input type="date" id="feed-p-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Date</label>
+                <input type="date" id="feedDate" required />
               </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Purchase</button>
+              <button class="btn btn-primary" type="submit">Record Purchase</button>
             </form>
           </div>
-          <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-            <h3 class="font-bold text-slate-100 mb-3">Record Daily Consumption</h3>
-            <form onsubmit="addFeedConsumption(event)" class="space-y-3">
+
+          <div class="panel">
+            <h3>Record Daily Consumption</h3>
+            <form id="frmFeedConsume">
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Quantity Consumed (kg)</label>
-                <input type="number" id="feed-c-qty" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Quantity Consumed (kg)</label>
+                <input type="number" id="feedConsumeQty" min="1" required />
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-                <input type="date" id="feed-c-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+                <label>Date</label>
+                <input type="date" id="feedConsumeDate" required />
               </div>
-              <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Record Consumption</button>
+              <button class="btn btn-primary" type="submit">Record Consumption</button>
             </form>
           </div>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-4">Feed Logs</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-neutral-800 uppercase text-slate-400">
-                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Change (kg)</th><th class="p-2">Details</th></tr>
-              </thead>
-              <tbody id="feed-history" class="divide-y divide-neutral-800"></tbody>
-            </table>
-          </div>
+
+        <div class="panel">
+          <h3>Feed Logs</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Type</th><th>Change</th><th>Detail</th></tr>
+            </thead>
+            <tbody id="feedHistoryBody"></tbody>
+          </table>
+          <div class="chart-box" style="height:200px; margin-top:18px;"><canvas id="chartFeed"></canvas></div>
         </div>
-      </div>
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-          <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
-          <span>Feed Purchases vs Consumption</span>
-        </h3>
-        <div class="relative h-72"><canvas id="chart-feed"></canvas></div>
       </div>
     </section>
 
-    <!-- 3.8 Treatment Scheduling -->
-    <section id="view-treatment" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Treatment Scheduling</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-100 mb-3">Create Treatment Plan</h3>
-          <div class="mb-4">
-            <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Kind of Treatment (Day-Old Chick → Maturity)</label>
-            <select id="treat-preset" onchange="applyTreatmentPreset(this.value)" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
-              <option value="">-- Select a standard schedule item --</option>
-            </select>
-            <p class="text-xs text-slate-400 mt-1">Picking an item auto-fills the fields below. You can still edit them or type your own.</p>
-          </div>
-          <form onsubmit="addTreatmentPlan(event)" class="space-y-3">
+    <section class="view" id="view-treatment">
+      <div class="topbar"><h2>Treatment Scheduling</h2></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Create Treatment Plan</h3>
+          <form id="frmTreatment">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Treatment Name (Kind of Treatment)</label>
-              <input type="text" id="treat-name" placeholder="e.g. Newcastle Disease Vaccine" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Treatment Name</label>
+              <input type="text" id="treatName" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Type</label>
-              <select id="treat-type" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Type</label>
+              <select id="treatType">
                 <option value="Vaccination">Vaccination</option>
                 <option value="Dewormer">Dewormer</option>
                 <option value="Medication">Medication</option>
@@ -490,886 +703,626 @@
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Recommended Age (Days)</label>
-              <input type="number" id="treat-age" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Recommended Age (Days)</label>
+              <input type="number" id="treatAge" required />
             </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Plan</button>
+            <button class="btn btn-primary" type="submit">Save Plan</button>
           </form>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
-            <h3 class="font-bold text-slate-100">Treatment Schedule & Log</h3>
-            <div class="flex items-center gap-2">
-              <label class="text-xs font-semibold text-slate-400 uppercase whitespace-nowrap">Viewing schedule for:</label>
-              <select id="treat-batch-view" onchange="onTreatmentBatchChange(this.value)" class="border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-xs"></select>
-            </div>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-neutral-800 uppercase text-slate-400">
-                <tr><th class="p-2">Treatment</th><th class="p-2">Target Age</th><th class="p-2">Due Date</th><th class="p-2">Status</th><th class="p-2">Action</th></tr>
-              </thead>
-              <tbody id="treatment-list" class="divide-y divide-neutral-800"></tbody>
-            </table>
-          </div>
+        <div class="panel">
+          <h3>Schedule & Log</h3>
+          <div id="treatmentList" class="list"></div>
+          <div class="chart-box" style="height:180px; margin-top:18px;"><canvas id="chartTreatment"></canvas></div>
         </div>
-      </div>
-      <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-        <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-          <i data-lucide="pie-chart" class="w-5 h-5 text-emerald-400"></i>
-          <span>Treatment Completion Status</span>
-        </h3>
-        <div class="relative h-64 max-w-sm mx-auto"><canvas id="chart-treatment-status"></canvas></div>
       </div>
     </section>
 
-    <!-- 3.9 Financial Tracking -->
-    <section id="view-finance" class="space-y-6 hidden">
-      <h2 class="text-2xl font-bold text-slate-100">Financial Tracking</h2>
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm h-fit">
-          <h3 class="font-bold text-slate-100 mb-3">Record Transaction</h3>
-          <form onsubmit="addTransaction(event)" class="space-y-3">
+    <section class="view" id="view-finance">
+      <div class="topbar"><h2>Financial Tracking</h2></div>
+      <div class="grid-2">
+        <div class="panel">
+          <h3>Record Transaction</h3>
+          <form id="frmFinance">
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Type</label>
-              <select id="fin-type" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Type</label>
+              <select id="finType">
                 <option value="Revenue">Revenue</option>
                 <option value="Expense">Expense</option>
               </select>
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Category / Source</label>
-              <input type="text" id="fin-cat" placeholder="e.g. Feed, Medication, Eggs" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Category / Source</label>
+              <input type="text" id="finCategory" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Amount (KES)</label>
-              <input type="number" id="fin-amount" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Amount (KES)</label>
+              <input type="number" id="finAmount" min="1" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Date</label>
-              <input type="date" id="fin-date" required class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Date</label>
+              <input type="date" id="finDate" required />
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-300 uppercase mb-1">Description</label>
-              <input type="text" id="fin-desc" class="w-full border border-neutral-700 bg-neutral-800 text-white rounded-lg p-2 text-sm">
+              <label>Description</label>
+              <input type="text" id="finDesc" />
             </div>
-            <button type="submit" class="w-full bg-emerald-700 text-white font-medium py-2 rounded-lg text-sm">Save Transaction</button>
+            <button class="btn btn-primary" type="submit">Save Transaction</button>
           </form>
         </div>
-        <div class="lg:col-span-2 bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-4">Financial Ledger</h3>
-          <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs text-slate-300">
-              <thead class="bg-neutral-800 uppercase text-slate-400">
-                <tr><th class="p-2">Date</th><th class="p-2">Type</th><th class="p-2">Category</th><th class="p-2">Amount (KES)</th><th class="p-2">Description</th></tr>
-              </thead>
-              <tbody id="finance-history" class="divide-y divide-neutral-800"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="bar-chart-3" class="w-5 h-5 text-emerald-400"></i>
-            <span>Revenue vs Expenses by Date</span>
-          </h3>
-          <div class="relative h-72"><canvas id="chart-finance-full"></canvas></div>
-        </div>
-        <div class="bg-neutral-900 p-5 rounded-xl border border-neutral-800 shadow-sm">
-          <h3 class="font-bold text-slate-100 mb-3 flex items-center space-x-2">
-            <i data-lucide="trending-up" class="w-5 h-5 text-emerald-400"></i>
-            <span>Cumulative Net Profit / Loss</span>
-          </h3>
-          <div class="relative h-72"><canvas id="chart-net-cumulative"></canvas></div>
+        <div class="panel">
+          <h3>Financial Ledger</h3>
+          <table>
+            <thead>
+              <tr><th>Date</th><th>Type</th><th>Category</th><th>Amount</th><th>Details</th></tr>
+            </thead>
+            <tbody id="financeHistoryBody"></tbody>
+          </table>
+          <div class="chart-box" style="height:220px; margin-top:18px;"><canvas id="chartFinanceFull"></canvas></div>
         </div>
       </div>
     </section>
-
   </main>
 
-  <!-- JavaScript App Logic -->
   <script>
-    // Initialize today's date format (YYYY-MM-DD)
-    const todayStr = new Date().toISOString().split('T')[0];
+    const STORAGE_KEY = 'poultry_dashboard_offline_v1';
+    const today = new Date().toISOString().slice(0, 10);
 
-    // Chart.js dark theme defaults (matches the black dashboard background)
-    if (typeof Chart !== 'undefined') {
-      Chart.defaults.color = '#cbd5e1';
-      Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
-      Chart.defaults.font.family = "ui-sans-serif, system-ui, sans-serif";
-    }
-    const chartRegistry = {};
-    function renderChart(canvasId, config) {
-      const canvas = document.getElementById(canvasId);
-      if (!canvas || typeof Chart === 'undefined') return;
-      if (chartRegistry[canvasId]) chartRegistry[canvasId].destroy();
-      chartRegistry[canvasId] = new Chart(canvas, config);
-    }
-
-    // Standard poultry treatment/vaccination schedule: day-old chick -> maturity (point of lay, ~18 weeks)
-    // Ages are in days from hatch/arrival. Adjust per your vet's local guidance.
-    const PRESET_TREATMENTS = [
-      { name: "Marek's Disease Vaccine",                         type: 'Vaccination',        ageDays: 1   },
-      { name: 'Newcastle Disease (B1/Hitchner) + IB Vaccine',     type: 'Vaccination',        ageDays: 3   },
-      { name: 'Gumboro (IBD) Vaccine – 1st Dose',                 type: 'Vaccination',        ageDays: 7   },
-      { name: 'Newcastle Disease (Lasota) Booster',               type: 'Vaccination',        ageDays: 14  },
-      { name: 'Gumboro (IBD) Vaccine – 2nd Dose',                 type: 'Vaccination',        ageDays: 21  },
-      { name: 'Deworming – 1st Dose',                             type: 'Dewormer',           ageDays: 28  },
-      { name: 'Multivitamin / Electrolyte Support',               type: 'Vitamin/Supplement', ageDays: 30  },
-      { name: 'Fowl Typhoid Vaccine',                             type: 'Vaccination',        ageDays: 35  },
-      { name: 'Newcastle Disease (Lasota) Booster 2',             type: 'Vaccination',        ageDays: 42  },
-      { name: 'Fowl Pox Vaccine',                                 type: 'Vaccination',        ageDays: 49  },
-      { name: 'Infectious Coryza Vaccine',                        type: 'Vaccination',        ageDays: 56  },
-      { name: 'Deworming – 2nd Dose',                             type: 'Dewormer',           ageDays: 63  },
-      { name: 'Newcastle Disease + IB Booster',                   type: 'Vaccination',        ageDays: 70  },
-      { name: 'Fowl Typhoid Booster',                             type: 'Vaccination',        ageDays: 98  },
-      { name: 'Newcastle Disease (Pre-Lay) + IB + EDS Vaccine',   type: 'Vaccination',        ageDays: 112 },
-      { name: 'Deworming – Pre-Lay / Maturity Dose',              type: 'Dewormer',           ageDays: 126 }
-    ];
-
-    // Local Storage Data Store Initialization
     const defaultData = {
-      profile: { name: "Green Valley Farm", location: "Nairobi", size: "5 Acres", estDate: "2024-01-15", contact: "+254 700 000 000" },
+      profile: {
+        name: 'Green Valley Farm',
+        location: 'Nairobi',
+        size: '5 Acres',
+        estDate: '2024-01-15',
+        contact: '+254 700 000 000'
+      },
       flocks: [
-        { id: 'batch-a', batchName: 'Batch A - Layers', initialCount: 500, arrivalDate: '2026-05-01', mortalities: [] },
-        { id: 'batch-b', batchName: 'Batch B - Chicks', initialCount: 200, arrivalDate: '2026-08-25', mortalities: [] }
+        { id: 'batch-a', name: 'Batch A - Layers', initialCount: 500, arrivalDate: '2026-05-01', mortalities: [] },
+        { id: 'batch-b', name: 'Batch B - Chicks', initialCount: 200, arrivalDate: '2026-08-25', mortalities: [] }
       ],
       activities: [
-        { id: '1', title: 'Clean coops', desc: 'Disinfect coop B', date: '2026-09-10', time: '08:00', completed: false }
+        { id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(), title: 'Clean coops', description: 'Disinfect coop B', date: '2026-09-10', time: '08:00' }
       ],
-      egg: { quota: 400, history: [{ date: todayStr, actual: 380 }] },
-      sales: [{ id: '1', date: todayStr, crates: 10, price: 800 }],
-      feed: {
-        inventory: [
-          { date: '2026-09-01', type: 'Layers Mash', qty: 500, mode: 'purchase' },
-          { date: todayStr, type: 'Layers Mash', qty: 50, mode: 'consumed' }
-        ]
-      },
-      treatments: PRESET_TREATMENTS.map((t, i) => ({
-        id: 'preset-' + i,
-        name: t.name,
-        type: t.type,
-        ageDays: t.ageDays
-      })),
+      eggQuota: 400,
+      eggHistory: [{ date: today, actual: 380 }],
+      sales: [{ id: 'sale-1', date: today, crates: 10, price: 800 }],
+      feedInventory: [
+        { id: 'p-1', date: '2026-09-01', type: 'Layers Mash', quantity: 500, kind: 'purchase' },
+        { id: 'p-2', date: today, type: 'Layers Mash', quantity: 50, kind: 'consumed' }
+      ],
+      treatments: [
+        { id: 't-1', name: 'Newcastle Disease Vaccine', type: 'Vaccination', ageDays: 14 },
+        { id: 't-2', name: 'Deworming - 1st Dose', type: 'Dewormer', ageDays: 28 }
+      ],
       treatmentLog: [],
       finance: [
-        { id: '1', date: todayStr, type: 'Expense', category: 'Feed', amount: 5000, desc: 'Layer mash 50kg' },
-        { id: '2', date: todayStr, type: 'Revenue', category: 'Crate Sales', amount: 8000, desc: 'Sales to wholesale' }
+        { id: 'f-1', date: today, type: 'Expense', category: 'Feed', amount: 5000, description: 'Layer mash 50kg' },
+        { id: 'f-2', date: today, type: 'Revenue', category: 'Crate Sales', amount: 8000, description: 'Sales to wholesale' }
       ]
     };
 
-    let db = JSON.parse(localStorage.getItem('poultry_db')) || defaultData;
+    let db = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+    if (!db) db = structuredClone(defaultData);
 
-    // --- Data migration: convert a legacy single-flock structure into multi-batch flocks ---
-    if (!db.flocks) {
-      if (db.flock && db.flock.arrivalDate) {
-        db.flocks = [{
-          id: 'batch-1',
-          batchName: 'Batch 1',
-          initialCount: db.flock.initialCount || 0,
-          arrivalDate: db.flock.arrivalDate,
-          mortalities: db.flock.mortalities || []
-        }];
-      } else {
-        db.flocks = [];
-      }
-      delete db.flock;
-    }
-    if (!db.treatmentLog) {
-      db.treatmentLog = [];
-      // Migrate old per-treatment "completed" flags onto the first batch, if one exists
-      if (db.flocks.length && Array.isArray(db.treatments)) {
-        db.treatments.forEach(t => {
-          if (t.completed) {
-            db.treatmentLog.push({ batchId: db.flocks[0].id, treatmentId: t.id, completedDate: t.completedDate || todayStr });
-          }
-          delete t.completed;
-          delete t.completedDate;
-        });
-      }
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      render();
     }
 
-    // Which flock batch's treatment schedule is currently shown on the Treatment Scheduling page
-    let selectedTreatmentBatchId = null;
-
-    function saveDB() {
-      localStorage.setItem('poultry_db', JSON.stringify(db));
-      renderApp();
-    }
-
-    // Tab Navigation Logic
-    function switchTab(tabId) {
-      document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-      document.getElementById('view-' + tabId).classList.remove('hidden');
-
-      document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('bg-emerald-800', 'text-white');
-        btn.classList.add('hover:bg-emerald-800/60', 'text-emerald-100');
-      });
-      const activeBtn = document.getElementById('btn-' + tabId);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-emerald-800', 'text-white');
-        activeBtn.classList.remove('hover:bg-emerald-800/60', 'text-emerald-100');
-      }
-
-      // Re-render charts in the newly visible section so they pick up correct dimensions
-      // (Chart.js sizes canvases to 0 while their container is display:none).
-      if (typeof renderCharts === 'function') renderCharts();
-    }
-
-    // Date Utilities
-    function calculateDaysDifference(date1Str, date2Str) {
-      const d1 = new Date(date1Str);
-      const d2 = new Date(date2Str);
-      const diffTime = d2 - d1;
-      return Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    }
-
-    function addDays(dateStr, days) {
-      const result = new Date(dateStr);
-      result.setDate(result.getDate() + parseInt(days));
-      return result.toISOString().split('T')[0];
-    }
-
-    // Core Business Calculations
-    function getFlockBatches() {
-      return (db.flocks || []).map(f => {
-        const mortalityTotal = (f.mortalities || []).reduce((acc, m) => acc + (parseInt(m.count) || 0), 0);
-        const currentCount = Math.max(0, (parseInt(f.initialCount) || 0) - mortalityTotal);
-        const ageDays = f.arrivalDate ? Math.max(0, calculateDaysDifference(f.arrivalDate, todayStr)) : 0;
-        const ageWeeks = (ageDays / 7).toFixed(1);
-        return { ...f, mortalityTotal, currentCount, ageDays, ageWeeks };
+    function getFlockRows() {
+      return db.flocks.map(f => {
+        const deaths = (f.mortalities || []).reduce((sum, m) => sum + Number(m.count || 0), 0);
+        const current = Math.max(0, Number(f.initialCount || 0) - deaths);
+        const age = f.arrivalDate ? Math.max(0, Math.floor((new Date(today) - new Date(f.arrivalDate)) / 86400000)) : 0;
+        return { ...f, deaths, current, age };
       });
     }
 
-    function getTotalFlockCount() {
-      return getFlockBatches().reduce((acc, f) => acc + f.currentCount, 0);
+    function formatMoney(v) {
+      return 'KES ' + Number(v || 0).toLocaleString();
     }
 
-    function populateBatchSelect(selectEl, batches, currentValue) {
-      if (!selectEl) return;
-      const prev = currentValue !== undefined ? currentValue : selectEl.value;
-      selectEl.innerHTML = batches.length
-        ? batches.map(b => `<option value="${b.id}">${b.batchName} — ${b.ageDays}d old</option>`).join('')
-        : '<option value="">No batches yet — add one first</option>';
-      if (batches.some(b => b.id === prev)) selectEl.value = prev;
-    }
+    function renderDashboard() {
+      const rows = getFlockRows();
+      const total = rows.reduce((sum, f) => sum + f.current, 0);
+      const todayEgg = (db.eggHistory.find(e => e.date === today) || { actual: 0 }).actual;
+      const quota = Number(db.eggQuota || 0);
+      const eggRate = quota ? ((todayEgg / quota) * 100).toFixed(1) : '0.0';
 
-    function getFeedStats() {
-      let total = 0;
-      let totalConsumed = 0;
-      let consumptionDays = 0;
+      document.getElementById('farmName').textContent = db.profile.name || 'Poultry Hub';
+      document.getElementById('todayLabel').textContent = today;
+      document.getElementById('flockAgeTag').textContent = rows.length ? `Flock Age: ${rows[0].age} Days` : 'Flock Age: -';
 
-      db.feed.inventory.forEach(item => {
-        if (item.mode === 'purchase') total += parseInt(item.qty);
-        if (item.mode === 'consumed') {
-          total -= parseInt(item.qty);
-          totalConsumed += parseInt(item.qty);
-          consumptionDays++;
-        }
+      document.getElementById('dashFlockCount').textContent = total;
+      document.getElementById('dashEggActual').textContent = todayEgg;
+      document.getElementById('dashQuota').textContent = quota;
+      document.getElementById('dashCrates').textContent = db.sales.filter(s => s.date === today).reduce((sum, s) => sum + Number(s.crates || 0), 0);
+
+      const feedTotal = db.feedInventory.filter(i => i.kind === 'purchase').reduce((sum, i) => sum + Number(i.quantity || 0), 0) -
+        db.feedInventory.filter(i => i.kind === 'consumed').reduce((sum, i) => sum + Number(i.quantity || 0), 0);
+      document.getElementById('dashFeed').textContent = `${Math.max(0, feedTotal)} kg`;
+      document.getElementById('feedStatus').textContent = feedTotal < 50 ? 'Low Inventory' : 'Stock Healthy';
+
+      const rev = db.finance.filter(f => f.date === today && f.type === 'Revenue').reduce((sum, f) => sum + Number(f.amount || 0), 0);
+      const exp = db.finance.filter(f => f.date === today && f.type === 'Expense').reduce((sum, f) => sum + Number(f.amount || 0), 0);
+      const net = rev - exp;
+      document.getElementById('dashRevenue').textContent = formatMoney(rev);
+      document.getElementById('dashExpenses').textContent = formatMoney(exp);
+      document.getElementById('dashNet').textContent = formatMoney(net);
+      document.getElementById('dashNet').style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+
+      const batchBox = document.getElementById('batchOverview');
+      batchBox.innerHTML = rows.map(f => `
+        <div class="batch-item">
+          <strong>${f.name}</strong>
+          <div class="muted">Age: ${f.age} days</div>
+          <div class="muted">Current: ${f.current} birds</div>
+        </div>
+      `).join('') || '<div class="muted">No flock batches yet</div>';
+
+      const activityBox = document.getElementById('activityList');
+      const nextItems = [...db.activities].sort((a, b) => a.date.localeCompare(b.date)).slice(0, 3);
+      activityBox.innerHTML = nextItems.map(a => `
+        <div class="list-item">
+          <strong>${a.title}</strong>
+          <div class="muted">${a.date} ${a.time || ''}</div>
+        </div>
+      `).join('') || '<div class="muted">No activity scheduled</div>';
+
+      renderLineChart('chartEgg', {
+        labels: db.eggHistory.slice(-7).map(e => e.date),
+        seriesA: db.eggHistory.slice(-7).map(e => Number(e.actual || 0)),
+        seriesB: db.eggHistory.slice(-7).map(() => Number(db.eggQuota || 0)),
+        colors: ['#22c55e', '#fbbf24'],
+        legend: ['Actual Eggs', 'Quota']
       });
 
-      const avgDailyConsumption = consumptionDays > 0 ? (totalConsumed / consumptionDays) : 0;
-      const isLow = avgDailyConsumption > 0 ? total < (avgDailyConsumption * 7) : total < 50;
-
-      return { total, avgDailyConsumption, isLow };
-    }
-
-    // Chart Renderers
-    function aggregateFinanceByDate(finance) {
-      const map = {};
-      finance.forEach(f => {
-        if (!map[f.date]) map[f.date] = { rev: 0, exp: 0 };
-        if (f.type === 'Revenue') map[f.date].rev += parseFloat(f.amount) || 0;
-        else map[f.date].exp += parseFloat(f.amount) || 0;
-      });
-      return Object.keys(map).sort().map(date => ({ date, rev: map[date].rev, exp: map[date].exp }));
-    }
-
-    function aggregateFeedByDate(inventory) {
-      const map = {};
-      inventory.forEach(f => {
-        if (!map[f.date]) map[f.date] = { purchased: 0, consumed: 0 };
-        if (f.mode === 'purchase') map[f.date].purchased += parseInt(f.qty) || 0;
-        else map[f.date].consumed += parseInt(f.qty) || 0;
-      });
-      return Object.keys(map).sort().map(date => ({ date, purchased: map[date].purchased, consumed: map[date].consumed }));
-    }
-
-    function renderCharts() {
-      const lineOpts = {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: { legend: { labels: { color: '#cbd5e1' } } },
-        scales: {
-          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.06)' } },
-          y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.06)' } }
-        }
-      };
-
-      // --- Egg production trend (dashboard, last 7 entries) ---
-      const eggRecent = [...db.egg.history].slice(0, 7).reverse();
-      renderChart('chart-egg-trend', {
-        type: 'line',
-        data: {
-          labels: eggRecent.map(e => e.date),
-          datasets: [
-            { label: 'Actual Eggs', data: eggRecent.map(e => e.actual), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.15)', tension: 0.3, fill: true },
-            { label: 'Quota', data: eggRecent.map(() => db.egg.quota || 0), borderColor: '#fbbf24', borderDash: [5, 5], tension: 0, fill: false, pointRadius: 0 }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Egg production full history (Egg Production page) ---
-      const eggFull = [...db.egg.history].reverse();
-      renderChart('chart-egg-full', {
-        type: 'line',
-        data: {
-          labels: eggFull.map(e => e.date),
-          datasets: [
-            { label: 'Actual Eggs', data: eggFull.map(e => e.actual), borderColor: '#34d399', backgroundColor: 'rgba(52,211,153,0.15)', tension: 0.3, fill: true },
-            { label: 'Quota', data: eggFull.map(() => db.egg.quota || 0), borderColor: '#fbbf24', borderDash: [5, 5], tension: 0, fill: false, pointRadius: 0 }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Finance trend (dashboard, last 7 dates) ---
-      const financeAgg = aggregateFinanceByDate(db.finance);
-      const financeRecent = financeAgg.slice(-7);
-      renderChart('chart-finance-trend', {
-        type: 'bar',
-        data: {
-          labels: financeRecent.map(f => f.date),
-          datasets: [
-            { label: 'Revenue (KES)', data: financeRecent.map(f => f.rev), backgroundColor: '#34d399' },
-            { label: 'Expenses (KES)', data: financeRecent.map(f => f.exp), backgroundColor: '#fb7185' }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Finance full history (Financial Tracking page) ---
-      renderChart('chart-finance-full', {
-        type: 'bar',
-        data: {
-          labels: financeAgg.map(f => f.date),
-          datasets: [
-            { label: 'Revenue (KES)', data: financeAgg.map(f => f.rev), backgroundColor: '#34d399' },
-            { label: 'Expenses (KES)', data: financeAgg.map(f => f.exp), backgroundColor: '#fb7185' }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Cumulative net profit/loss ---
-      let running = 0;
-      const cumulative = financeAgg.map(f => { running += (f.rev - f.exp); return { date: f.date, net: running }; });
-      renderChart('chart-net-cumulative', {
-        type: 'line',
-        data: {
-          labels: cumulative.map(c => c.date),
-          datasets: [
-            { label: 'Cumulative Net (KES)', data: cumulative.map(c => c.net), borderColor: '#60a5fa', backgroundColor: 'rgba(96,165,250,0.15)', tension: 0.3, fill: true }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Sales trend (crates & revenue) ---
-      const salesSorted = [...db.sales].sort((a, b) => a.date.localeCompare(b.date));
-      renderChart('chart-sales', {
-        type: 'bar',
-        data: {
-          labels: salesSorted.map(s => s.date),
-          datasets: [
-            { label: 'Crates Sold', data: salesSorted.map(s => s.crates), backgroundColor: '#60a5fa', yAxisID: 'y' },
-            { label: 'Revenue (KES)', data: salesSorted.map(s => s.crates * s.price), backgroundColor: '#34d399', yAxisID: 'y1', type: 'line', borderColor: '#34d399', tension: 0.3 }
-          ]
-        },
-        options: {
-          ...lineOpts,
-          scales: {
-            x: lineOpts.scales.x,
-            y: { position: 'left', ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.06)' }, title: { display: true, text: 'Crates', color: '#94a3b8' } },
-            y1: { position: 'right', ticks: { color: '#94a3b8' }, grid: { drawOnChartArea: false }, title: { display: true, text: 'KES', color: '#94a3b8' } }
-          }
-        }
-      });
-
-      // --- Feed purchases vs consumption ---
-      const feedAgg = aggregateFeedByDate(db.feed.inventory);
-      renderChart('chart-feed', {
-        type: 'bar',
-        data: {
-          labels: feedAgg.map(f => f.date),
-          datasets: [
-            { label: 'Purchased (kg)', data: feedAgg.map(f => f.purchased), backgroundColor: '#a3e635' },
-            { label: 'Consumed (kg)', data: feedAgg.map(f => f.consumed), backgroundColor: '#fb7185' }
-          ]
-        },
-        options: lineOpts
-      });
-
-      // --- Flock batch age comparison ---
-      const batchesForChart = getFlockBatches();
-      renderChart('chart-flock-ages', {
-        type: 'bar',
-        data: {
-          labels: batchesForChart.map(b => b.batchName),
-          datasets: [{ label: 'Age (Days)', data: batchesForChart.map(b => b.ageDays), backgroundColor: '#60a5fa' }]
-        },
-        options: lineOpts
-      });
-
-      // --- Treatment completion status (doughnut), scoped to the batch shown on the Treatment page ---
-      const activeBatchForChart = batchesForChart.find(b => b.id === selectedTreatmentBatchId);
-      let completedCount = 0;
-      let scheduledCount = db.treatments.length;
-      if (activeBatchForChart) {
-        completedCount = db.treatments.filter(t => (db.treatmentLog || []).some(l => l.batchId === activeBatchForChart.id && l.treatmentId === t.id)).length;
-        scheduledCount = db.treatments.length - completedCount;
-      }
-      renderChart('chart-treatment-status', {
-        type: 'doughnut',
-        data: {
-          labels: ['Administered', 'Scheduled'],
-          datasets: [{ data: [completedCount, scheduledCount], backgroundColor: ['#34d399', '#fbbf24'] }]
-        },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#cbd5e1' } } } }
+      renderBarChart('chartFinance', {
+        labels: db.finance.slice(-7).map(f => f.date),
+        seriesA: db.finance.slice(-7).map(f => f.type === 'Revenue' ? Number(f.amount || 0) : 0),
+        seriesB: db.finance.slice(-7).map(f => f.type === 'Expense' ? Number(f.amount || 0) : 0),
+        colors: ['#22c55e', '#f87171'],
+        legend: ['Revenue', 'Expenses']
       });
     }
 
-    // UI Renderers
-    function renderApp() {
-      document.getElementById('current-date-display').innerText = todayStr;
-      document.getElementById('nav-farm-name').innerText = db.profile.name || "Poultry Hub";
+    function renderProfile() {
+      document.getElementById('profileName').value = db.profile.name || '';
+      document.getElementById('profileLocation').value = db.profile.location || '';
+      document.getElementById('profileSize').value = db.profile.size || '';
+      document.getElementById('profileEstDate').value = db.profile.estDate || '';
+      document.getElementById('profileContact').value = db.profile.contact || '';
+    }
 
-      // 1. Dashboard Metrics
-      const flockBatches = getFlockBatches();
-      const totalFlockCount = flockBatches.reduce((acc, f) => acc + f.currentCount, 0);
-      document.getElementById('dash-flock-count').innerText = totalFlockCount;
+    function renderActivity() {
+      const box = document.getElementById('scheduledActivities');
+      box.innerHTML = (db.activities || []).slice().sort((a, b) => a.date.localeCompare(b.date)).map(a => `
+        <div class="list-item">
+          <strong>${a.title}</strong>
+          <div class="muted">${a.description || 'No description'}</div>
+          <div class="muted">${a.date} ${a.time || ''}</div>
+        </div>
+      `).join('') || '<div class="muted">No scheduled activities</div>';
+    }
 
-      let flockAgeTagText;
-      if (flockBatches.length === 0) flockAgeTagText = 'No Active Flocks';
-      else if (flockBatches.length === 1) flockAgeTagText = `Flock Age: ${flockBatches[0].ageDays} Days (${flockBatches[0].ageWeeks} Wks)`;
-      else flockAgeTagText = `${flockBatches.length} Batches Active`;
-      document.getElementById('dash-flock-age-tag').innerText = flockAgeTagText;
+    function renderFlocks() {
+      const rows = getFlockRows();
+      const list = document.getElementById('flockList');
+      const select = document.getElementById('mortBatch');
 
-      document.getElementById('dash-flock-batches').innerHTML = flockBatches.length
-        ? [...flockBatches].sort((a, b) => a.ageDays - b.ageDays).map(b => `
-            <div class="bg-neutral-800 p-3 rounded-lg border border-neutral-700">
-              <p class="font-semibold text-slate-100 text-sm">${b.batchName}</p>
-              <p class="text-xs text-slate-400">Arrived: ${b.arrivalDate}</p>
-              <p class="text-lg font-bold text-emerald-400 mt-1">${b.ageDays}d <span class="text-xs text-slate-400 font-normal">(${b.ageWeeks} wks)</span></p>
-              <p class="text-xs text-slate-400">${b.currentCount} birds</p>
-            </div>
-          `).join('')
-        : '<p class="text-sm text-slate-400 sm:col-span-2 lg:col-span-3">No flock batches yet — add one under Flock Management.</p>';
+      list.innerHTML = rows.map(f => `
+        <div class="list-item">
+          <strong>${f.name}</strong>
+          <div class="muted">Started: ${f.arrivalDate}</div>
+          <div class="muted">Current: ${f.current} birds · Age: ${f.age} days</div>
+        </div>
+      `).join('') || '<div class="muted">No batches added yet</div>';
 
-      const todayEgg = db.egg.history.find(e => e.date === todayStr) || { actual: 0 };
-      const eggQuota = db.egg.quota || 1;
-      const eggRate = ((todayEgg.actual / eggQuota) * 100).toFixed(1);
-      document.getElementById('dash-egg-actual').innerText = todayEgg.actual;
-      document.getElementById('dash-egg-quota').innerText = eggQuota;
-      document.getElementById('dash-egg-rate').innerText = `${eggRate}% Rate`;
+      const options = rows.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+      select.innerHTML = options || '<option value="">No batches</option>';
 
-      const todaySales = db.sales.filter(s => s.date === todayStr).reduce((acc, curr) => acc + parseInt(curr.crates), 0);
-      document.getElementById('dash-crates-sold').innerText = todaySales;
-
-      const feedStats = getFeedStats();
-      document.getElementById('dash-feed-inv').innerText = `${feedStats.total} kg`;
-      document.getElementById('dash-feed-alert').innerHTML = feedStats.isLow 
-        ? `<span class="text-rose-400 font-bold">⚠️ Low Inventory!</span>` 
-        : `<span class="text-emerald-400">Stock Healthy</span>`;
-
-      // Financial Today
-      const todayRev = db.finance.filter(f => f.date === todayStr && f.type === 'Revenue').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-      const todayExp = db.finance.filter(f => f.date === todayStr && f.type === 'Expense').reduce((acc, curr) => acc + parseFloat(curr.amount), 0);
-      const net = todayRev - todayExp;
-
-      document.getElementById('dash-today-rev').innerText = `${todayRev.toLocaleString()} KES`;
-      document.getElementById('dash-today-exp').innerText = `${todayExp.toLocaleString()} KES`;
-      const netElem = document.getElementById('dash-today-net');
-      netElem.innerText = `${net.toLocaleString()} KES`;
-      netElem.className = `text-xl font-bold ${net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
-
-      // Dashboard Lists
-      const upcomingAct = db.activities
-        .filter(a => !a.completed)
-        .slice(0, 4);
-      document.getElementById('dash-upcoming-activities').innerHTML = upcomingAct.length ? upcomingAct.map(a => `
-        <li class="py-2 flex justify-between items-center">
-          <div><p class="font-semibold text-slate-100">${a.title}</p><p class="text-xs text-slate-400">${a.date} ${a.time || ''}</p></div>
-          <span class="text-xs bg-neutral-800 text-slate-300 px-2 py-1 rounded">${a.completed ? 'Done' : 'Pending'}</span>
-        </li>
-      `).join('') : '<li class="py-2 text-slate-400">No scheduled activities</li>';
-
-      const upcomingTreat = [];
-      flockBatches.forEach(b => {
-        db.treatments.forEach(t => {
-          const logged = (db.treatmentLog || []).some(l => l.batchId === b.id && l.treatmentId === t.id);
-          if (!logged) {
-            upcomingTreat.push({ name: t.name, batchName: b.batchName, ageDays: t.ageDays, dueDate: addDays(b.arrivalDate, t.ageDays) });
-          }
-        });
+      renderBarChart('chartFlockAge', {
+        labels: rows.map(f => f.name),
+        seriesA: rows.map(f => f.age),
+        colors: ['#60a5fa'],
+        legend: ['Age (days)']
       });
-      upcomingTreat.sort((a, b) => a.dueDate.localeCompare(b.dueDate));
-      const upcomingTreatTop = upcomingTreat.slice(0, 4);
-      document.getElementById('dash-upcoming-treatments').innerHTML = upcomingTreatTop.length ? upcomingTreatTop.map(t => `
-        <li class="py-2 flex justify-between items-center">
-          <div><p class="font-semibold text-slate-100">${t.name}</p><p class="text-xs text-slate-400">${t.batchName} · Due: ${t.dueDate} (Age ${t.ageDays}d)</p></div>
-          <span class="text-xs bg-amber-900/50 text-amber-300 px-2 py-1 rounded">Upcoming</span>
-        </li>
-      `).join('') : '<li class="py-2 text-slate-400">No upcoming treatments</li>';
+    }
 
-      // Render Forms Default Values
-      document.getElementById('prof-name').value = db.profile.name || '';
-      document.getElementById('prof-location').value = db.profile.location || '';
-      document.getElementById('prof-size').value = db.profile.size || '';
-      document.getElementById('prof-est-date').value = db.profile.estDate || '';
-      document.getElementById('prof-contact').value = db.profile.contact || '';
-
-      document.getElementById('egg-quota-input').value = db.egg.quota || '';
-
-      // Flock batch selects (mortality form + treatment schedule viewer)
-      populateBatchSelect(document.getElementById('mort-flock-select'), flockBatches);
-
-      // Render Tables
-      document.getElementById('flock-batches-overview').innerHTML = flockBatches.length
-        ? [...flockBatches].sort((a, b) => a.arrivalDate.localeCompare(b.arrivalDate)).map(b => `
-            <div class="bg-neutral-800 p-4 rounded-lg border border-neutral-700">
-              <div class="flex justify-between items-start">
-                <div>
-                  <p class="font-bold text-slate-100">${b.batchName}</p>
-                  <p class="text-xs text-slate-400">Arrived: ${b.arrivalDate}</p>
-                </div>
-                <button onclick="deleteFlockBatch('${b.id}')" class="text-xs text-rose-400 hover:underline">Remove</button>
-              </div>
-              <div class="mt-3 grid grid-cols-2 gap-2 text-xs">
-                <div><p class="text-slate-400">AGE</p><p class="text-emerald-400 font-bold text-base">${b.ageDays}d (${b.ageWeeks}w)</p></div>
-                <div><p class="text-slate-400">CURRENT COUNT</p><p class="text-slate-100 font-bold text-base">${b.currentCount}</p></div>
-                <div><p class="text-slate-400">INITIAL COUNT</p><p class="text-slate-300">${b.initialCount}</p></div>
-                <div><p class="text-slate-400">MORTALITY</p><p class="text-rose-400">${b.mortalityTotal}</p></div>
-              </div>
-            </div>
-          `).join('')
-        : '<p class="text-sm text-slate-400 sm:col-span-2">No flock batches yet. Add your first batch using the form on the left.</p>';
-
-      const allMortalities = [];
-      flockBatches.forEach(b => (b.mortalities || []).forEach(m => allMortalities.push({ ...m, batchName: b.batchName })));
-      allMortalities.sort((a, b) => b.date.localeCompare(a.date));
-      document.getElementById('mortality-history').innerHTML = allMortalities.length
-        ? allMortalities.map(m => `<tr><td class="p-2">${m.date}</td><td class="p-2">${m.batchName}</td><td class="p-2">${m.count}</td><td class="p-2">${m.reason}</td></tr>`).join('')
-        : '<tr><td colspan="4" class="p-2 text-slate-400">No mortality records yet.</td></tr>';
-
-      document.getElementById('activity-list').innerHTML = db.activities.map(a => `
-        <li class="p-3 bg-neutral-800 rounded-lg border border-neutral-800 flex justify-between items-center">
-          <div>
-            <span class="font-semibold text-sm ${a.completed ? 'line-through text-slate-400' : 'text-slate-100'}">${a.title}</span>
-            <p class="text-xs text-slate-400">${a.desc || ''} | Date: ${a.date} ${a.time || ''}</p>
-          </div>
-          <div class="flex items-center space-x-2">
-            <button onclick="toggleActivity('${a.id}')" class="text-xs ${a.completed ? 'bg-emerald-900/40 text-emerald-400' : 'bg-neutral-700 text-slate-300'} px-2 py-1 rounded">
-              ${a.completed ? 'Completed' : 'Mark Done'}
-            </button>
-            <button onclick="deleteActivity('${a.id}')" class="text-xs text-rose-400 hover:underline">Delete</button>
-          </div>
-        </li>
-      `).join('');
-
-      document.getElementById('egg-history').innerHTML = db.egg.history.map(e => {
-        const rate = db.egg.quota ? ((e.actual / db.egg.quota) * 100).toFixed(1) : 0;
-        return `<tr><td class="p-2">${e.date}</td><td class="p-2">${e.actual}</td><td class="p-2">${db.egg.quota}</td><td class="p-2 font-semibold ${rate >= 90 ? 'text-emerald-400' : 'text-amber-400'}">${rate}%</td></tr>`;
+    function renderEggs() {
+      const tbody = document.getElementById('eggHistoryBody');
+      tbody.innerHTML = (db.eggHistory || []).slice().reverse().map(entry => {
+        const quota = Number(db.eggQuota || 0);
+        const rate = quota ? ((Number(entry.actual || 0) / quota) * 100).toFixed(1) : '0.0';
+        return `<tr><td>${entry.date}</td><td>${entry.actual}</td><td>${quota}</td><td>${rate}%</td></tr>`;
       }).join('');
 
-      document.getElementById('sales-history').innerHTML = db.sales.map(s => `
-        <tr><td class="p-2">${s.date}</td><td class="p-2">${s.crates}</td><td class="p-2">${s.price} KES</td><td class="p-2 font-bold text-emerald-400">${(s.crates * s.price).toLocaleString()} KES</td></tr>
+      document.getElementById('quotaInput').value = db.eggQuota || '';
+      document.getElementById('eggDate').value = today;
+      renderLineChart('chartEggFull', {
+        labels: (db.eggHistory || []).slice(-10).map(e => e.date),
+        seriesA: (db.eggHistory || []).slice(-10).map(e => Number(e.actual || 0)),
+        seriesB: (db.eggHistory || []).slice(-10).map(() => Number(db.eggQuota || 0)),
+        colors: ['#22c55e', '#fbbf24'],
+        legend: ['Actual', 'Quota']
+      });
+    }
+
+    function renderSales() {
+      const tbody = document.getElementById('salesHistoryBody');
+      tbody.innerHTML = (db.sales || []).slice().reverse().map(s => `
+        <tr><td>${s.date}</td><td>${s.crates}</td><td>${Number(s.price).toLocaleString()}</td><td>${(Number(s.crates) * Number(s.price)).toLocaleString()}</td></tr>
       `).join('');
+      document.getElementById('saleDate').value = today;
+      renderBarChart('chartSales', {
+        labels: (db.sales || []).slice(-7).map(s => s.date),
+        seriesA: (db.sales || []).slice(-7).map(s => Number(s.crates || 0)),
+        seriesB: (db.sales || []).slice(-7).map(s => Number(s.crates || 0) * Number(s.price || 0)),
+        colors: ['#60a5fa', '#22c55e'],
+        legend: ['Crates Sold', 'Revenue'],
+        type: 'dual'
+      });
+    }
 
-      document.getElementById('feed-history').innerHTML = db.feed.inventory.map(f => `
-        <tr><td class="p-2">${f.date}</td><td class="p-2">${f.type}</td><td class="p-2 font-bold ${f.mode === 'purchase' ? 'text-emerald-400' : 'text-rose-400'}">${f.mode === 'purchase' ? '+' : '-'}${f.qty} kg</td><td class="p-2 uppercase text-xs">${f.mode}</td></tr>
-      `).join('');
-
-      // Determine which batch's treatment schedule to show
-      if (!selectedTreatmentBatchId || !flockBatches.some(b => b.id === selectedTreatmentBatchId)) {
-        selectedTreatmentBatchId = flockBatches[0] ? flockBatches[0].id : null;
-      }
-      populateBatchSelect(document.getElementById('treat-batch-view'), flockBatches, selectedTreatmentBatchId);
-      const activeBatch = flockBatches.find(b => b.id === selectedTreatmentBatchId);
-
-      document.getElementById('treatment-list').innerHTML = !activeBatch
-        ? `<tr><td colspan="5" class="p-4 text-center text-slate-400">Add a flock batch under Flock Management to see its treatment schedule.</td></tr>`
-        : db.treatments.map(t => {
-            const dueDate = addDays(activeBatch.arrivalDate, t.ageDays);
-            const logEntry = (db.treatmentLog || []).find(l => l.batchId === activeBatch.id && l.treatmentId === t.id);
-            const completed = !!logEntry;
-            return `
-              <tr>
-                <td class="p-2 font-medium">${t.name} <span class="text-xs text-slate-400">(${t.type})</span></td>
-                <td class="p-2">${t.ageDays} Days</td>
-                <td class="p-2 font-semibold text-emerald-400">${dueDate}</td>
-                <td class="p-2"><span class="px-2 py-0.5 rounded text-xs ${completed ? 'bg-emerald-900/50 text-emerald-300' : 'bg-amber-900/50 text-amber-300'}">${completed ? 'Administered' : 'Scheduled'}</span></td>
-                <td class="p-2">
-                  ${!completed ? `<button onclick="markTreatmentDone('${activeBatch.id}','${t.id}')" class="bg-emerald-700 text-white text-xs px-2 py-1 rounded">Mark Administered</button>` : `<span class="text-xs text-slate-400">${logEntry.completedDate}</span>`}
-                </td>
-              </tr>
-            `;
-          }).join('');
-
-      document.getElementById('finance-history').innerHTML = db.finance.map(f => `
+    function renderFeed() {
+      const tbody = document.getElementById('feedHistoryBody');
+      tbody.innerHTML = (db.feedInventory || []).slice().reverse().map(item => `
         <tr>
-          <td class="p-2">${f.date}</td>
-          <td class="p-2 font-semibold ${f.type === 'Revenue' ? 'text-emerald-400' : 'text-rose-400'}">${f.type}</td>
-          <td class="p-2">${f.category}</td>
-          <td class="p-2 font-bold">${parseFloat(f.amount).toLocaleString()} KES</td>
-          <td class="p-2 text-slate-400">${f.desc || '-'}</td>
+          <td>${item.date}</td>
+          <td>${item.type}</td>
+          <td>${item.kind === 'purchase' ? '+' : '-'}${item.quantity}</td>
+          <td>${item.kind}</td>
         </tr>
       `).join('');
-
-      renderCharts();
-      lucide.createIcons();
+      document.getElementById('feedDate').value = today;
+      document.getElementById('feedConsumeDate').value = today;
+      renderBarChart('chartFeed', {
+        labels: (db.feedInventory || []).slice(-7).map(i => i.date),
+        seriesA: (db.feedInventory || []).slice(-7).map(i => i.kind === 'purchase' ? Number(i.quantity || 0) : 0),
+        seriesB: (db.feedInventory || []).slice(-7).map(i => i.kind === 'consumed' ? Number(i.quantity || 0) : 0),
+        colors: ['#a3e635', '#f87171'],
+        legend: ['Purchased', 'Consumed']
+      });
     }
 
-    // Action Handlers
-    function saveProfile(e) {
+    function renderTreatments() {
+      const box = document.getElementById('treatmentList');
+      box.innerHTML = (db.treatments || []).map(t => `
+        <div class="list-item">
+          <strong>${t.name}</strong>
+          <div class="muted">${t.type} · Age: ${t.ageDays} days</div>
+        </div>
+      `).join('') || '<div class="muted">No treatment plans yet</div>';
+
+      const completed = (db.treatmentLog || []).length;
+      const scheduled = Math.max(0, (db.treatments || []).length - completed);
+      renderDoughnutChart('chartTreatment', [completed, scheduled], ['Administered', 'Scheduled']);
+    }
+
+    function renderFinance() {
+      const tbody = document.getElementById('financeHistoryBody');
+      tbody.innerHTML = (db.finance || []).slice().reverse().map(f => `
+        <tr><td>${f.date}</td><td>${f.type}</td><td>${f.category}</td><td>${Number(f.amount).toLocaleString()}</td><td>${f.description || ''}</td></tr>
+      `).join('');
+      document.getElementById('finDate').value = today;
+
+      const agg = aggregateFinance();
+      const labels = agg.map(x => x.date);
+      const rev = agg.map(x => x.revenue);
+      const exp = agg.map(x => x.expense);
+      renderBarChart('chartFinanceFull', { labels, seriesA: rev, seriesB: exp, colors: ['#22c55e', '#f87171'], legend: ['Revenue', 'Expenses'] });
+    }
+
+    function aggregateFinance() {
+      const map = {};
+      for (const row of db.finance || []) {
+        const date = row.date;
+        if (!map[date]) map[date] = { date, revenue: 0, expense: 0 };
+        if (row.type === 'Revenue') map[date].revenue += Number(row.amount || 0);
+        else map[date].expense += Number(row.amount || 0);
+      }
+      return Object.values(map).sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function render() {
+      renderDashboard();
+      renderProfile();
+      renderActivity();
+      renderFlocks();
+      renderEggs();
+      renderSales();
+      renderFeed();
+      renderTreatments();
+      renderFinance();
+    }
+
+    function renderLineChart(canvasId, config) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.clientWidth || 300;
+      const h = c.clientHeight || 180;
+      c.width = w * window.devicePixelRatio;
+      c.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.clearRect(0, 0, w, h);
+
+      const pad = 30;
+      const maxY = Math.max(...config.seriesA.concat(config.seriesB), 1);
+      const minY = 0;
+      const chartW = w - pad * 2;
+      const chartH = h - pad * 2;
+
+      ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i <= 4; i++) {
+        const y = pad + (chartH / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+      }
+
+      function drawSeries(vals, color) {
+        ctx.beginPath();
+        vals.forEach((v, idx) => {
+          const x = pad + (idx / Math.max(vals.length - 1, 1)) * chartW;
+          const y = pad + chartH - ((v - minY) / Math.max(maxY - minY, 1)) * chartH;
+          if (idx === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        });
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      drawSeries(config.seriesA, config.colors[0]);
+      if (config.seriesB) drawSeries(config.seriesB, config.colors[1]);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '11px Arial';
+      config.labels.forEach((label, idx) => {
+        const x = pad + (idx / Math.max(config.labels.length - 1, 1)) * chartW;
+        ctx.fillText(label.slice(-2), x - 6, h - 8);
+      });
+    }
+
+    function renderBarChart(canvasId, config) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.clientWidth || 300;
+      const h = c.clientHeight || 180;
+      c.width = w * window.devicePixelRatio;
+      c.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.clearRect(0, 0, w, h);
+
+      const pad = 30;
+      const max = Math.max(...config.seriesA.concat(config.seriesB), 1);
+      const chartW = w - pad * 2;
+      const chartH = h - pad * 2;
+      const barWidth = (chartW / Math.max(config.labels.length, 1)) * 0.35;
+
+      ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+      for (let i = 0; i <= 4; i++) {
+        const y = pad + (chartH / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(pad, y);
+        ctx.lineTo(w - pad, y);
+        ctx.stroke();
+      }
+
+      config.labels.forEach((label, idx) => {
+        const x = pad + (idx + 0.5) * (chartW / Math.max(config.labels.length, 1));
+        const v1 = Number(config.seriesA[idx] || 0);
+        const v2 = Number(config.seriesB[idx] || 0);
+
+        if (config.type === 'dual') {
+          const bar1 = (v1 / max) * chartH;
+          const bar2 = (v2 / max) * chartH;
+          ctx.fillStyle = config.colors[0];
+          ctx.fillRect(x - barWidth, h - pad - bar1, barWidth, bar1);
+          ctx.fillStyle = config.colors[1];
+          ctx.fillRect(x, h - pad - bar2, barWidth, bar2);
+        } else {
+          const bar = (v1 / max) * chartH;
+          ctx.fillStyle = config.colors[0];
+          ctx.fillRect(x - barWidth / 2, h - pad - bar, barWidth, bar);
+          if (config.seriesB && config.seriesB.some(v => v > 0)) {
+            const bar2 = (v2 / max) * chartH;
+            ctx.fillStyle = config.colors[1];
+            ctx.fillRect(x + barWidth / 2, h - pad - bar2, barWidth, bar2);
+          }
+        }
+
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '10px Arial';
+        ctx.fillText(String(label).slice(-2), x - 6, h - 8);
+      });
+    }
+
+    function renderDoughnutChart(canvasId, data, labels) {
+      const c = document.getElementById(canvasId);
+      if (!c) return;
+      const ctx = c.getContext('2d');
+      const w = c.clientWidth || 220;
+      const h = c.clientHeight || 170;
+      c.width = w * window.devicePixelRatio;
+      c.height = h * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+      ctx.clearRect(0, 0, w, h);
+
+      const total = data.reduce((a, b) => a + b, 0) || 1;
+      let start = -Math.PI / 2;
+      const colors = ['#22c55e', '#fbbf24'];
+      data.forEach((value, idx) => {
+        const slice = (value / total) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(w / 2, h / 2);
+        ctx.arc(w / 2, h / 2, Math.min(w, h) / 3, start, start + slice);
+        ctx.closePath();
+        ctx.fillStyle = colors[idx % colors.length];
+        ctx.fill();
+        start += slice;
+      });
+
+      ctx.fillStyle = '#e5eefb';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(`${data[0] || 0}`, w / 2, h / 2 + 5);
+    }
+
+    // nav
+    document.querySelectorAll('.nav button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const target = btn.dataset.tab;
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('view-' + target).classList.add('active');
+      });
+    });
+
+    // Forms
+    document.getElementById('frmProfile').addEventListener('submit', e => {
       e.preventDefault();
       db.profile = {
-        name: document.getElementById('prof-name').value,
-        location: document.getElementById('prof-location').value,
-        size: document.getElementById('prof-size').value,
-        estDate: document.getElementById('prof-est-date').value,
-        contact: document.getElementById('prof-contact').value
+        name: document.getElementById('profileName').value,
+        location: document.getElementById('profileLocation').value,
+        size: document.getElementById('profileSize').value,
+        estDate: document.getElementById('profileEstDate').value,
+        contact: document.getElementById('profileContact').value
       };
-      saveDB();
-      alert('Farm profile saved successfully!');
-    }
+      save();
+    });
 
-    function addFlockBatch(e) {
+    document.getElementById('frmActivity').addEventListener('submit', e => {
       e.preventDefault();
-      const name = document.getElementById('flock-name-input').value.trim();
-      const count = parseInt(document.getElementById('flock-count-input').value);
-      const arrivalDate = document.getElementById('flock-arrival-date').value;
-      if (!name) return alert('Please give this batch a name or label.');
-      if (isNaN(count) || count < 0) return alert('Flock count cannot be negative.');
+      db.activities.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        title: document.getElementById('actTitle').value,
+        description: document.getElementById('actDesc').value,
+        date: document.getElementById('actDate').value,
+        time: document.getElementById('actTime').value
+      });
+      e.target.reset();
+      save();
+    });
+
+    document.getElementById('frmFlock').addEventListener('submit', e => {
+      e.preventDefault();
       db.flocks.push({
-        id: 'batch-' + Date.now().toString(),
-        batchName: name,
-        initialCount: count,
-        arrivalDate,
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        name: document.getElementById('flockName').value,
+        initialCount: Number(document.getElementById('flockCount').value || 0),
+        arrivalDate: document.getElementById('flockDate').value,
         mortalities: []
       });
-      saveDB();
       e.target.reset();
-      document.getElementById('flock-arrival-date').value = todayStr;
-    }
+      save();
+    });
 
-    function deleteFlockBatch(id) {
-      const batch = db.flocks.find(f => f.id === id);
-      if (!batch) return;
-      if (confirm(`Remove "${batch.batchName}" and all its mortality/treatment records? This cannot be undone.`)) {
-        db.flocks = db.flocks.filter(f => f.id !== id);
-        db.treatmentLog = (db.treatmentLog || []).filter(l => l.batchId !== id);
-        if (selectedTreatmentBatchId === id) selectedTreatmentBatchId = null;
-        saveDB();
-      }
-    }
-
-    function recordMortality(e) {
+    document.getElementById('frmMortality').addEventListener('submit', e => {
       e.preventDefault();
-      const batchId = document.getElementById('mort-flock-select').value;
-      const count = parseInt(document.getElementById('mort-count').value);
-      const reason = document.getElementById('mort-reason').value;
-      const date = document.getElementById('mort-date').value;
-      const batch = db.flocks.find(f => f.id === batchId);
-      if (!batch) return alert('Please select a flock batch first.');
-      if (isNaN(count) || count <= 0) return alert('Number must be greater than zero.');
-      batch.mortalities.push({ count, reason, date });
-      saveDB();
-      e.target.reset();
-      document.getElementById('mort-date').value = todayStr;
-    }
-
-    function confirmResetFlock() {
-      if (confirm('Remove ALL flock batches and their mortality logs? This cannot be undone.')) {
-        const idsToRemove = db.flocks.map(f => f.id);
-        db.flocks = [];
-        db.treatmentLog = (db.treatmentLog || []).filter(l => !idsToRemove.includes(l.batchId));
-        selectedTreatmentBatchId = null;
-        saveDB();
-      }
-    }
-
-    function addActivity(e) {
-      e.preventDefault();
-      db.activities.unshift({
-        id: Date.now().toString(),
-        title: document.getElementById('act-title').value,
-        desc: document.getElementById('act-desc').value,
-        date: document.getElementById('act-date').value,
-        time: document.getElementById('act-time').value,
-        completed: false
+      const batchId = document.getElementById('mortBatch').value;
+      const flock = db.flocks.find(f => f.id === batchId);
+      if (!flock) return;
+      flock.mortalities.push({
+        count: Number(document.getElementById('mortCount').value || 0),
+        reason: document.getElementById('mortReason').value,
+        date: document.getElementById('mortDate').value
       });
-      saveDB();
       e.target.reset();
-    }
+      save();
+    });
 
-    function toggleActivity(id) {
-      const act = db.activities.find(a => a.id === id);
-      if (act) act.completed = !act.completed;
-      saveDB();
-    }
-
-    function deleteActivity(id) {
-      db.activities = db.activities.filter(a => a.id !== id);
-      saveDB();
-    }
-
-    function saveEggQuota(e) {
+    document.getElementById('frmQuota').addEventListener('submit', e => {
       e.preventDefault();
-      db.egg.quota = parseInt(document.getElementById('egg-quota-input').value);
-      saveDB();
-    }
+      db.eggQuota = Number(document.getElementById('quotaInput').value || 0);
+      save();
+    });
 
-    function addEggProduction(e) {
+    document.getElementById('frmEggRecord').addEventListener('submit', e => {
       e.preventDefault();
-      const actual = parseInt(document.getElementById('egg-actual-input').value);
-      const date = document.getElementById('egg-date-input').value;
-
-      const existingIndex = db.egg.history.findIndex(e => e.date === date);
-      if (existingIndex >= 0) {
-        db.egg.history[existingIndex].actual = actual;
-      } else {
-        db.egg.history.unshift({ date, actual });
-      }
-      saveDB();
-    }
-
-    function addSale(e) {
-      e.preventDefault();
-      const crates = parseInt(document.getElementById('sale-crates').value);
-      const price = parseFloat(document.getElementById('sale-price').value);
-      const date = document.getElementById('sale-date').value;
-
-      db.sales.unshift({ id: Date.now().toString(), date, crates, price });
-
-      // Automatically add to revenue
-      db.finance.unshift({
-        id: Date.now().toString(),
-        date,
-        type: 'Revenue',
-        category: 'Crate Sales',
-        amount: crates * price,
-        desc: `Automatic log: ${crates} crates @ KES ${price}`
+      db.eggHistory.push({
+        date: document.getElementById('eggDate').value,
+        actual: Number(document.getElementById('eggActual').value || 0)
       });
-
-      saveDB();
       e.target.reset();
-    }
+      document.getElementById('eggDate').value = today;
+      save();
+    });
 
-    function addFeedPurchase(e) {
+    document.getElementById('frmSale').addEventListener('submit', e => {
       e.preventDefault();
-      const type = document.getElementById('feed-p-type').value;
-      const qty = parseInt(document.getElementById('feed-p-qty').value);
-      const date = document.getElementById('feed-p-date').value;
-
-      db.feed.inventory.unshift({ date, type, qty, mode: 'purchase' });
-      saveDB();
-      e.target.reset();
-    }
-
-    function addFeedConsumption(e) {
-      e.preventDefault();
-      const qty = parseInt(document.getElementById('feed-c-qty').value);
-      const date = document.getElementById('feed-c-date').value;
-
-      db.feed.inventory.unshift({ date, type: 'Layers Mash', qty, mode: 'consumed' });
-      saveDB();
-      e.target.reset();
-    }
-
-    function populateTreatmentPresets() {
-      const select = document.getElementById('treat-preset');
-      if (!select) return;
-      PRESET_TREATMENTS.forEach((t, i) => {
-        const opt = document.createElement('option');
-        opt.value = i;
-        opt.textContent = `${t.name} — Day ${t.ageDays} (${t.type})`;
-        select.appendChild(opt);
+      db.sales.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        date: document.getElementById('saleDate').value,
+        crates: Number(document.getElementById('saleCrates').value || 0),
+        price: Number(document.getElementById('salePrice').value || 0)
       });
-    }
+      e.target.reset();
+      document.getElementById('saleDate').value = today;
+      save();
+    });
 
-    function applyTreatmentPreset(index) {
-      if (index === '' || index === null || index === undefined) return;
-      const t = PRESET_TREATMENTS[parseInt(index)];
-      if (!t) return;
-      document.getElementById('treat-name').value = t.name;
-      document.getElementById('treat-type').value = t.type;
-      document.getElementById('treat-age').value = t.ageDays;
-    }
+    document.getElementById('frmFeedPurchase').addEventListener('submit', e => {
+      e.preventDefault();
+      db.feedInventory.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        date: document.getElementById('feedDate').value,
+        type: document.getElementById('feedType').value,
+        quantity: Number(document.getElementById('feedQty').value || 0),
+        kind: 'purchase'
+      });
+      e.target.reset();
+      document.getElementById('feedDate').value = today;
+      save();
+    });
 
-    function addTreatmentPlan(e) {
+    document.getElementById('frmFeedConsume').addEventListener('submit', e => {
+      e.preventDefault();
+      db.feedInventory.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        date: document.getElementById('feedConsumeDate').value,
+        type: 'Feed consumption',
+        quantity: Number(document.getElementById('feedConsumeQty').value || 0),
+        kind: 'consumed'
+      });
+      e.target.reset();
+      document.getElementById('feedConsumeDate').value = today;
+      save();
+    });
+
+    document.getElementById('frmTreatment').addEventListener('submit', e => {
       e.preventDefault();
       db.treatments.push({
-        id: Date.now().toString(),
-        name: document.getElementById('treat-name').value,
-        type: document.getElementById('treat-type').value,
-        ageDays: parseInt(document.getElementById('treat-age').value),
-        completed: false,
-        completedDate: null
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        name: document.getElementById('treatName').value,
+        type: document.getElementById('treatType').value,
+        ageDays: Number(document.getElementById('treatAge').value || 0)
       });
-      saveDB();
       e.target.reset();
-      document.getElementById('treat-preset').value = '';
-    }
+      save();
+    });
 
-    function markTreatmentDone(batchId, treatmentId) {
-      db.treatmentLog = db.treatmentLog || [];
-      const existing = db.treatmentLog.find(l => l.batchId === batchId && l.treatmentId === treatmentId);
-      if (existing) {
-        existing.completedDate = todayStr;
-      } else {
-        db.treatmentLog.push({ batchId, treatmentId, completedDate: todayStr });
-      }
-      saveDB();
-    }
-
-    function onTreatmentBatchChange(id) {
-      selectedTreatmentBatchId = id || null;
-      renderApp();
-    }
-
-    function addTransaction(e) {
+    document.getElementById('frmFinance').addEventListener('submit', e => {
       e.preventDefault();
-      db.finance.unshift({
-        id: Date.now().toString(),
-        type: document.getElementById('fin-type').value,
-        category: document.getElementById('fin-cat').value,
-        amount: parseFloat(document.getElementById('fin-amount').value),
-        date: document.getElementById('fin-date').value,
-        desc: document.getElementById('fin-desc').value
+      db.finance.push({
+        id: crypto.randomUUID ? crypto.randomUUID() : Date.now() + Math.random(),
+        date: document.getElementById('finDate').value,
+        type: document.getElementById('finType').value,
+        category: document.getElementById('finCategory').value,
+        amount: Number(document.getElementById('finAmount').value || 0),
+        description: document.getElementById('finDesc').value
       });
-      saveDB();
       e.target.reset();
-    }
+      document.getElementById('finDate').value = today;
+      save();
+    });
 
-    // Set Default Input Dates to Today
-    document.getElementById('act-date').value = todayStr;
-    document.getElementById('mort-date').value = todayStr;
-    document.getElementById('egg-date-input').value = todayStr;
-    document.getElementById('sale-date').value = todayStr;
-    document.getElementById('feed-p-date').value = todayStr;
-    document.getElementById('feed-c-date').value = todayStr;
-    document.getElementById('fin-date').value = todayStr;
-    document.getElementById('flock-arrival-date').value = todayStr;
-
-    // Populate the standard treatment presets dropdown
-    populateTreatmentPresets();
-
-    // Initial App Render
-    renderApp();
+    window.addEventListener('resize', () => render());
+    render();
   </script>
 </body>
 </html>
