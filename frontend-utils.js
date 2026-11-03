@@ -4,14 +4,8 @@
   const FarmUI = {
     async checkBackendHealth() {
       try {
-        const response = await fetch('/api/health', {
-          headers: { Accept: 'application/json' }
-        });
-
-        if (!response.ok) {
-          throw new Error('Backend unavailable');
-        }
-
+        const response = await fetch('/api/health', { headers: { Accept: 'application/json' } });
+        if (!response.ok) throw new Error('Backend unavailable');
         return await response.json();
       } catch (error) {
         return null;
@@ -66,23 +60,6 @@
 
     saveDashboardState(key, value) {
       return this.writeStorage(`dashboard:${key}`, value);
-    },
-
-    async syncConsumerRecord(payload, method = 'POST') {
-      const path = '/api/consumers';
-      const requestMethod = method.toUpperCase();
-
-      if (requestMethod === 'PUT' && payload && payload.id) {
-        return this.apiRequest(`${path}/${payload.id}`, {
-          method: requestMethod,
-          body: JSON.stringify(payload)
-        });
-      }
-
-      return this.apiRequest(path, {
-        method: requestMethod,
-        body: JSON.stringify(payload)
-      });
     }
   };
 

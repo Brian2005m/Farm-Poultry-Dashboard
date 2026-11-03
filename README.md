@@ -49,8 +49,6 @@ SMTP is required to send verification links. If SMTP is not configured or delive
 - `GET /api/auth/me`
 - Existing consumer CRUD endpoints: `/api/consumers`
 
-Dashboard operational data in the existing pages is still stored in browser `localStorage`; authentication protects dashboard access but does not yet synchronize those records between users/devices.
-
 ## Deployment note
 
 The account email-verification flow needs a Node.js host with a writable persistent database and reachable SMTP provider. Static-only hosting such as GitHub Pages cannot run the server or send verification mail.
