@@ -1,14 +1,15 @@
 # Farm Poultry Dashboard
 
-A lightweight farm dashboard app with a Node.js + Express API. The main dashboard pages are static HTML files served by Express, and the app includes a small consumer-management API backed by a JSON file.
+A poultry farm dashboard app with a lightweight Express backend. It serves three dashboard UIs and includes a SQLite-backed consumer API for persistent records.
 
-## Features
+## What is included
 
-- Multi-dashboard landing page with three poultry dashboard flows
-- Broiler, Kienyeji, and general poultry dashboard interfaces
-- Lightweight backend API for consumer records
-- JSON file persistence with atomic writes
-- Easy local startup for development or simple hosting
+- Landing page with dashboard selection
+- Broiler dashboard
+- Kienyeji dashboard
+- General poultry dashboard
+- Shared frontend utility for health checks and data syncing
+- SQLite-backed consumer API
 
 ## Requirements
 
@@ -22,7 +23,7 @@ npm install
 npm start
 ```
 
-Then open:
+Then open the app in a browser:
 
 ```text
 http://localhost:3000
@@ -34,26 +35,26 @@ Custom port:
 PORT=4000 npm start
 ```
 
-Development mode with automatic restart:
+Development mode with auto-reload:
 
 ```bash
 npm run dev
 ```
 
-## API endpoints
+## API
 
-The dashboard includes a simple REST API for consumer records.
+The backend exposes consumer APIs backed by SQLite.
 
 | Method | Route | Description |
 | --- | --- | --- |
-| GET | /api/health | Check if the backend is online |
-| GET | /api/consumers | List all consumers |
-| GET | /api/consumers/:id | Fetch one consumer record |
+| GET | /api/health | Health check |
+| GET | /api/consumers | List consumers |
+| GET | /api/consumers/:id | Fetch one consumer |
 | POST | /api/consumers | Create a consumer |
 | PUT | /api/consumers/:id | Update a consumer |
 | DELETE | /api/consumers/:id | Delete a consumer |
 
-Example create request:
+Example:
 
 ```bash
 curl -X POST http://localhost:3000/api/consumers \
@@ -67,18 +68,17 @@ curl -X POST http://localhost:3000/api/consumers \
   }'
 ```
 
-## Data storage
+## Storage
 
-Consumer records are stored in:
+The database file is created at:
 
 ```text
-data/consumers.json
+data/farm.db
 ```
 
-The server also supports a custom directory via the `DATA_DIR` environment variable if you want to place the storage file somewhere else.
+Set `DATA_DIR` if you want to move the database storage directory.
 
 ## Notes
 
-- The dashboard pages themselves store browser-side state in `localStorage`.
-- The JSON API is designed for lightweight local use or a single-instance deployment.
-- For persistent production deployment, use a host with a writable filesystem and keep your data directory backed up.
+- The dashboard data in each HTML page still uses browser `localStorage` for the farm-specific charts and records.
+- This is a practical full-stack starter: persistent API storage is available, while page data remains client-side to keep the dashboard experience fast and self-contained.

@@ -1,25 +1,19 @@
-const crypto = require('crypto');
 const cors = require('cors');
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const sqlite3 = require('sqlite3').verbose();
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, 'data');
-const CONSUMERS_FILE = path.join(DATA_DIR, 'consumers.json');
+const DB_PATH = path.join(DATA_DIR, 'farm.db');
+let database = null;
+
 const MAX_NAME_LENGTH = 120;
 const MAX_TEXT_LENGTH = 2000;
-
-function ensureDataFile() {
-  fs.mkdirSync(DATA_DIR, { recursive: true });
-
-  if (!fs.existsSync(CONSUMERS_FILE)) {
-    fs.writeFileSync(CONSUMERS_FILE, '[]\n', 'utf8');
-  }
-}
 
 function makeHttpError(statusCode, message) {
   const error = new Error(message);
@@ -27,34 +21,50 @@ function makeHttpError(statusCode, message) {
   return error;
 }
 
-function readConsumers() {
-  ensureDataFile();
-  const contents = fs.readFileSync(CONSUMERS_FILE, 'utf8');
-
-  try {
-    const parsed = JSON.parse(contents);
-    if (!Array.isArray(parsed)) {
-      throw new Error('Expected the consumers data file to contain a JSON array.');
-    }
-    return parsed;
-  } catch (error) {
-    const wrapped = makeHttpError(500, `Unable to read consumers data: ${error.message}`);
-    throw wrapped;
-  }
+function ensureDataDir() {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function writeConsumers(consumers) {
-  ensureDataFile();
-  const tmpFile = `${CONSUMERS_FILE}.${process.pid}.${crypto.randomUUID()}.tmp`;
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    ensureDataDir();
 
-  try {
-    fs.writeFileSync(tmpFile, `${JSON.stringify(consumers, null, 2)}\n`, 'utf8');
-    fs.renameSync(tmpFile, CONSUMERS_FILE);
-  } finally {
-    if (fs.existsSync(tmpFile)) {
-      fs.unlinkSync(tmpFile);
-    }
-  }
+    const db = new sqlite3.Database(DB_PATH, (error) => {
+      if (error) {
+        return reject(makeHttpError(500, `Unable to open database: ${error.message}`));
+      }
+
+      db.serialize(() => {
+        db.run(
+          `CREATE TABLE IF NOT EXISTS consumers (
+            id TEXT PRIMARY KEY,
+            name TEXT NOT NULL,
+            phone TEXT NOT NULL,
+            email TEXT,
+            address TEXT,
+            buyerType TEXT,
+            eggsOrdered REAL DEFAULT 0,
+            location TEXT,
+            notes TEXT,
+            createdAt TEXT NOT NULL,
+            updatedAt TEXT NOT NULL
+          )`,
+          (createError) => {
+            if (createError) {
+              return reject(makeHttpError(500, `Database setup failed: ${createError.message}`));
+            }
+            return resolve(db);
+          }
+        );
+      });
+    });
+  });
+}
+
+async function getDatabase() {
+  if (database) return database;
+  database = await openDatabase();
+  return database;
 }
 
 function normalizeText(value, fieldName, options = {}) {
@@ -101,22 +111,137 @@ function normalizeConsumer(input = {}, existing = {}) {
     throw makeHttpError(400, 'eggsOrdered must be a non-negative number.');
   }
 
-  const name = normalizeText(input.name ?? existing.name, 'name', { required: true, maxLength: MAX_NAME_LENGTH });
-  const phone = normalizeText(input.phone ?? existing.phone, 'phone', { required: true, maxLength: 40 });
+  const name = normalizeText(input.name ?? existing.name, 'name', {
+    required: true,
+    maxLength: MAX_NAME_LENGTH
+  });
+
+  const phone = normalizeText(input.phone ?? existing.phone, 'phone', {
+    required: true,
+    maxLength: 40
+  });
 
   return {
-    id: existing.id || crypto.randomUUID(),
+    id: existing.id || cryptoRandomId(),
     name,
     phone,
     email: normalizeText(input.email ?? existing.email, 'email', { maxLength: 254 }),
     address: normalizeText(input.address ?? existing.address, 'address'),
-    buyerType: normalizeText(input.buyerType ?? existing.buyerType ?? 'Retail', 'buyerType', { maxLength: 80 }) || 'Retail',
+    buyerType: normalizeText(input.buyerType ?? existing.buyerType ?? 'Retail', 'buyerType', {
+      maxLength: 80
+    }) || 'Retail',
     eggsOrdered: eggsOrderedValue,
     location: normalizeText(input.location ?? existing.location, 'location', { maxLength: 120 }),
     notes: normalizeText(input.notes ?? existing.notes, 'notes'),
     createdAt: existing.createdAt || new Date().toISOString(),
     updatedAt: new Date().toISOString()
   };
+}
+
+function cryptoRandomId() {
+  return 'consumer-' + Date.now() + '-' + Math.random().toString(16).slice(2, 8);
+}
+
+function runSql(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.run(sql, params, function onComplete(error) {
+      if (error) return reject(error);
+      resolve({ lastID: this.lastID, changes: this.changes });
+    });
+  });
+}
+
+function allSql(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.all(sql, params, (error, rows) => {
+      if (error) return reject(error);
+      resolve(rows || []);
+    });
+  });
+}
+
+function getSql(db, sql, params = []) {
+  return new Promise((resolve, reject) => {
+    db.get(sql, params, (error, row) => {
+      if (error) return reject(error);
+      resolve(row || null);
+    });
+  });
+}
+
+async function listConsumers() {
+  const db = await getDatabase();
+  return allSql(db, 'SELECT * FROM consumers ORDER BY createdAt DESC');
+}
+
+async function getConsumerById(id) {
+  const db = await getDatabase();
+  return getSql(db, 'SELECT * FROM consumers WHERE id = ?', [id]);
+}
+
+async function addConsumer(data) {
+  const db = await getDatabase();
+  const consumer = normalizeConsumer(data, {});
+  await runSql(
+    db,
+    `INSERT INTO consumers (
+      id, name, phone, email, address, buyerType, eggsOrdered, location, notes, createdAt, updatedAt
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [
+      consumer.id,
+      consumer.name,
+      consumer.phone,
+      consumer.email,
+      consumer.address,
+      consumer.buyerType,
+      consumer.eggsOrdered,
+      consumer.location,
+      consumer.notes,
+      consumer.createdAt,
+      consumer.updatedAt
+    ]
+  );
+  return consumer;
+}
+
+async function updateConsumer(id, data) {
+  const db = await getDatabase();
+  const existing = await getConsumerById(id);
+
+  if (!existing) {
+    throw makeHttpError(404, 'Consumer not found.');
+  }
+
+  const consumer = normalizeConsumer(data, existing);
+  await runSql(
+    db,
+    `UPDATE consumers SET
+      name = ?, phone = ?, email = ?, address = ?, buyerType = ?, eggsOrdered = ?, location = ?, notes = ?, updatedAt = ?
+     WHERE id = ?`,
+    [
+      consumer.name,
+      consumer.phone,
+      consumer.email,
+      consumer.address,
+      consumer.buyerType,
+      consumer.eggsOrdered,
+      consumer.location,
+      consumer.notes,
+      consumer.updatedAt,
+      id
+    ]
+  );
+
+  return consumer;
+}
+
+async function deleteConsumer(id) {
+  const db = await getDatabase();
+  const result = await runSql(db, 'DELETE FROM consumers WHERE id = ?', [id]);
+  if (result.changes === 0) {
+    throw makeHttpError(404, 'Consumer not found.');
+  }
+  return { success: true };
 }
 
 app.disable('x-powered-by');
@@ -127,22 +252,23 @@ app.use(express.static(__dirname));
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'ok',
-    timestamp: new Date().toISOString(),
-    mode: 'consumer-api'
+    mode: 'sqlite',
+    timestamp: new Date().toISOString()
   });
 });
 
-app.get('/api/consumers', (req, res, next) => {
+app.get('/api/consumers', async (req, res, next) => {
   try {
-    res.json(readConsumers());
+    const consumers = await listConsumers();
+    res.json(consumers);
   } catch (error) {
     next(error);
   }
 });
 
-app.get('/api/consumers/:id', (req, res, next) => {
+app.get('/api/consumers/:id', async (req, res, next) => {
   try {
-    const consumer = readConsumers().find((item) => item.id === req.params.id);
+    const consumer = await getConsumerById(req.params.id);
     if (!consumer) {
       return res.status(404).json({ error: 'Consumer not found.' });
     }
@@ -152,47 +278,28 @@ app.get('/api/consumers/:id', (req, res, next) => {
   }
 });
 
-app.post('/api/consumers', (req, res, next) => {
+app.post('/api/consumers', async (req, res, next) => {
   try {
-    const consumers = readConsumers();
-    const consumer = normalizeConsumer(req.body, {});
-    consumers.push(consumer);
-    writeConsumers(consumers);
+    const consumer = await addConsumer(req.body || {});
     return res.status(201).json(consumer);
   } catch (error) {
     return next(error);
   }
 });
 
-app.put('/api/consumers/:id', (req, res, next) => {
+app.put('/api/consumers/:id', async (req, res, next) => {
   try {
-    const consumers = readConsumers();
-    const index = consumers.findIndex((item) => item.id === req.params.id);
-
-    if (index === -1) {
-      return res.status(404).json({ error: 'Consumer not found.' });
-    }
-
-    const consumer = normalizeConsumer(req.body, consumers[index]);
-    consumers[index] = consumer;
-    writeConsumers(consumers);
+    const consumer = await updateConsumer(req.params.id, req.body || {});
     return res.json(consumer);
   } catch (error) {
     return next(error);
   }
 });
 
-app.delete('/api/consumers/:id', (req, res, next) => {
+app.delete('/api/consumers/:id', async (req, res, next) => {
   try {
-    const consumers = readConsumers();
-    const remaining = consumers.filter((item) => item.id !== req.params.id);
-
-    if (remaining.length === consumers.length) {
-      return res.status(404).json({ error: 'Consumer not found.' });
-    }
-
-    writeConsumers(remaining);
-    return res.json({ success: true });
+    const response = await deleteConsumer(req.params.id);
+    return res.json(response);
   } catch (error) {
     return next(error);
   }
@@ -221,8 +328,8 @@ app.use((error, req, res, next) => {
   });
 });
 
-function startServer() {
-  ensureDataFile();
+async function startServer() {
+  await getDatabase();
   return app.listen(PORT, () => {
     console.log(`Farm Poultry Dashboard backend running at http://localhost:${PORT}`);
   });
@@ -232,5 +339,6 @@ if (require.main === module) {
   startServer();
 }
 
-module.exports = { app, startServer };
+module.exports = { app, startServer, getDatabase };
+
 

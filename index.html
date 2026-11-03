@@ -6,6 +6,7 @@
   <meta name="description" content="Poultry Hub provides a dashboard to manage poultry farm operations, business, and production." />
   <title>Poultry Hub | Dashboard Home</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/frontend-utils.js"></script>
   <style>
     :focus-visible {
       outline: 3px solid rgba(52, 211, 153, 0.9);
@@ -100,22 +101,26 @@
 
   <script>
     const backendStatus = document.getElementById('backend-status');
+    const health = window.FarmUI && window.FarmUI.checkBackendHealth ? window.FarmUI.checkBackendHealth() : null;
 
-    fetch('/api/health', { headers: { Accept: 'application/json' } })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Backend unavailable');
+    if (health) {
+      health.then((result) => {
+        if (result) {
+          backendStatus.textContent = 'App service is online.';
+          backendStatus.classList.add('text-emerald-300');
+          return;
         }
-        return response.json();
-      })
-      .then(() => {
-        backendStatus.textContent = 'App service is online.';
-        backendStatus.classList.add('text-emerald-300');
-      })
-      .catch(() => {
+
+        backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
+        backendStatus.classList.add('text-amber-300');
+      }).catch(() => {
         backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
         backendStatus.classList.add('text-amber-300');
       });
+    } else {
+      backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
+      backendStatus.classList.add('text-amber-300');
+    }
   </script>
 </body>
 </html>
