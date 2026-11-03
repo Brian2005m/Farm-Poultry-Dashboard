@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sign in or verify your email to access Poultry Hub farm dashboards.">
+  <meta name="theme-color" content="#020617">
+  <title>Poultry Hub | Verify your email</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/frontend-utils.js"></script>
+  <style>:focus-visible{outline:3px solid #34d399;outline-offset:3px}</style>
+</head>
+<body class="min-h-screen bg-slate-950 text-slate-100 antialiased">
+  <main class="mx-auto grid min-h-screen max-w-6xl items-center gap-10 px-4 py-10 md:grid-cols-2 sm:px-6 lg:px-8">
+    <section>
+      <a href="/" class="text-sm font-bold uppercase tracking-[.2em] text-emerald-400">🐓 Poultry Hub</a>
+      <h1 class="mt-8 text-4xl font-black tracking-tight sm:text-5xl">Start with your email.</h1>
+      <p class="mt-5 max-w-lg text-lg leading-8 text-slate-300">Create your account, verify your email from the secure link we send, then sign in to access the farm dashboards.</p>
+      <p class="mt-5 text-sm text-slate-400">The verification link expires after 30 minutes.</p>
+    </section>
+
+    <section class="rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl sm:p-8">
+      <div id="notice" class="mb-5 hidden rounded-lg border border-emerald-800 bg-emerald-950/60 p-4 text-sm text-emerald-200" role="status" aria-live="polite"></div>
+      <form id="register-form" class="space-y-4">
+        <h2 class="text-xl font-bold">Create account &amp; send verification link</h2>
+        <div>
+          <label for="register-email" class="mb-1 block text-sm font-medium text-slate-300">Email address</label>
+          <input id="register-email" name="email" type="email" autocomplete="email" required maxlength="254" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white" placeholder="you@example.com">
+        </div>
+        <div>
+          <label for="register-password" class="mb-1 block text-sm font-medium text-slate-300">Create password</label>
+          <input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="10" maxlength="128" class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white" placeholder="At least 10 characters">
+        </div>
+        <button id="register-submit" type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-bold text-white hover:bg-emerald-500">Email me a verification link</button>
+      </form>
+      <div class="my-7 border-t border-white/10"></div>
+      <form id="resend-form" class="space-y-3">
+        <label for="resend-email" class="block text-sm font-medium text-slate-300">Already registered but didn’t get the email?</label>
+        <div class="flex gap-2">
+          <input id="resend-email" name="email" type="email" autocomplete="email" required class="min-w-0 flex-1 rounded-lg border border-slate-700 bg-slate-950 px-3 py-2.5 text-white" placeholder="you@example.com">
+          <button type="submit" class="rounded-lg border border-slate-600 px-3 py-2 text-sm font-semibold hover:bg-slate-800">Resend</button>
+        </div>
+      </form>
+      <p class="mt-6 text-center text-sm text-slate-400">Already verified? <a class="font-semibold text-emerald-300 hover:text-emerald-200" href="/login.html">Sign in</a></p>
+    </section>
+  </main>
+  <script>
+    const notice = document.getElementById('notice');
+    const registerForm = document.getElementById('register-form');
+    const registerSubmit = document.getElementById('register-submit');
+
+    function showNotice(message, isError = false) {
+      notice.textContent = message;
+      notice.classList.remove('hidden', 'border-emerald-800', 'bg-emerald-950/60', 'text-emerald-200', 'border-rose-800', 'bg-rose-950/60', 'text-rose-200');
+      notice.classList.add(...(isError ? ['border-rose-800', 'bg-rose-950/60', 'text-rose-200'] : ['border-emerald-800', 'bg-emerald-950/60', 'text-emerald-200']));
+    }
+
+    async function submitJson(url, payload) {
+      return window.FarmUI.apiRequest(url, { method: 'POST', body: JSON.stringify(payload) });
+    }
+
+    registerForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      registerSubmit.disabled = true;
+      registerSubmit.textContent = 'Sending…';
+      try {
+        const body = Object.fromEntries(new FormData(registerForm));
+        const result = await submitJson('/api/auth/register', body);
+        showNotice(result.message || 'Check your inbox for the verification link.');
+      } catch (error) {
+        showNotice(error.message || 'Could not send verification email. Please try again.', true);
+      } finally {
+        registerSubmit.disabled = false;
+        registerSubmit.textContent = 'Email me a verification link';
+      }
+    });
+
+    document.getElementById('resend-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      try {
+        const email = new FormData(event.currentTarget).get('email');
+        const result = await submitJson('/api/auth/resend-verification', { email });
+        showNotice(result.message || 'If verification is needed, a new link will be sent.');
+      } catch (error) {
+        showNotice(error.message || 'Could not resend the email. Please try again.', true);
+      }
+    });
+  </script>
+</body>
+</html>

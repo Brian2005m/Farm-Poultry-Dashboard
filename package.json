@@ -1,18 +1,17 @@
 {
   "name": "farm-poultry-dashboard-backend",
-  "version": "1.2.0",
-  "description": "Farm Poultry Dashboard with a SQLite-backed API and shared frontend helpers",
+  "version": "1.3.0",
+  "description": "Poultry farm dashboards with verified-email authentication and SQLite persistence",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "engines": {
-    "node": ">=18"
-  },
+  "engines": { "node": ">=18" },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "nodemailer": "^6.9.16",
     "sqlite3": "^5.1.7"
   }
 }

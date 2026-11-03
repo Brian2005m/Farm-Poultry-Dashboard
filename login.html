@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sign in to your Poultry Hub account.">
+  <meta name="theme-color" content="#020617">
+  <title>Poultry Hub | Sign in</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/frontend-utils.js"></script>
+  <style>:focus-visible{outline:3px solid #34d399;outline-offset:3px}</style>
+</head>
+<body class="grid min-h-screen place-items-center bg-slate-950 px-4 py-10 text-slate-100 antialiased">
+  <main class="w-full max-w-md rounded-2xl border border-white/10 bg-slate-900/80 p-6 shadow-2xl sm:p-8">
+    <a href="/" class="text-sm font-bold uppercase tracking-[.2em] text-emerald-400">🐓 Poultry Hub</a>
+    <h1 class="mt-7 text-3xl font-black">Welcome back</h1>
+    <p class="mt-2 text-sm text-slate-400">Sign in with the email address you verified.</p>
+    <div id="notice" class="mt-5 hidden rounded-lg border p-3 text-sm" role="status" aria-live="polite"></div>
+    <form id="login-form" class="mt-6 space-y-4">
+      <div>
+        <label for="email" class="mb-1 block text-sm font-medium text-slate-300">Email address</label>
+        <input id="email" name="email" type="email" autocomplete="email" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white">
+      </div>
+      <div>
+        <label for="password" class="mb-1 block text-sm font-medium text-slate-300">Password</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required class="w-full rounded-lg border border-slate-700 bg-slate-950 px-3 py-3 text-white">
+      </div>
+      <button id="login-submit" type="submit" class="w-full rounded-lg bg-emerald-600 px-4 py-3 font-bold text-white hover:bg-emerald-500">Sign in</button>
+    </form>
+    <p class="mt-6 text-center text-sm text-slate-400">New to Poultry Hub? <a href="/signup.html" class="font-semibold text-emerald-300 hover:text-emerald-200">Create an account</a></p>
+  </main>
+  <script>
+    const notice = document.getElementById('notice');
+    const params = new URLSearchParams(location.search);
+    if (params.get('verified') === '1') {
+      notice.textContent = 'Email verified! Sign in to continue.';
+      notice.classList.remove('hidden');
+      notice.classList.add('border-emerald-800', 'bg-emerald-950/60', 'text-emerald-200');
+    } else if (params.has('error')) {
+      notice.textContent = params.get('error') === 'expired-link' ? 'That verification link expired. Request a new one.' : 'That verification link is invalid. Request a new one.';
+      notice.classList.remove('hidden');
+      notice.classList.add('border-rose-800', 'bg-rose-950/60', 'text-rose-200');
+    }
+
+    document.getElementById('login-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const button = document.getElementById('login-submit');
+      button.disabled = true;
+      try {
+        const payload = Object.fromEntries(new FormData(event.currentTarget));
+        await window.FarmUI.apiRequest('/api/auth/login', { method: 'POST', body: JSON.stringify(payload) });
+        location.assign('/');
+      } catch (error) {
+        notice.textContent = error.message || 'Unable to sign in.';
+        notice.classList.remove('hidden', 'border-emerald-800', 'bg-emerald-950/60', 'text-emerald-200');
+        notice.classList.add('border-rose-800', 'bg-rose-950/60', 'text-rose-200');
+      } finally {
+        button.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

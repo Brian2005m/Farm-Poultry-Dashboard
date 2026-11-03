@@ -1,84 +1,56 @@
 # Farm Poultry Dashboard
 
-A poultry farm dashboard app with a lightweight Express backend. It serves three dashboard UIs and includes a SQLite-backed consumer API for persistent records.
+Poultry Hub serves farm dashboards and a SQLite-backed API. Account access requires email verification: users register with an email and password, receive a one-time link, verify their address, and then sign in before opening a dashboard.
 
-## What is included
-
-- Landing page with dashboard selection
-- Broiler dashboard
-- Kienyeji dashboard
-- General poultry dashboard
-- Shared frontend utility for health checks and data syncing
-- SQLite-backed consumer API
-
-## Requirements
+## Requirements and startup
 
 - Node.js 18 or newer
 - npm
-
-## Run locally
+- SMTP credentials to deliver verification emails
 
 ```bash
 npm install
 npm start
 ```
 
-Then open the app in a browser:
-
-```text
-http://localhost:3000
-```
-
-Custom port:
+Open `http://localhost:3000` (or set `PORT`). Configure email and session settings before public deployment:
 
 ```bash
-PORT=4000 npm start
+PORT=3000
+PUBLIC_ORIGIN=https://your-domain.example
+SESSION_SECRET=use-a-long-random-secret
+SMTP_HOST=smtp.your-provider.example
+SMTP_PORT=587
+SMTP_SECURE=false
+SMTP_USER=your-smtp-user
+SMTP_PASSWORD=your-smtp-password
+EMAIL_FROM=Poultry Hub <no-reply@your-domain.example>
 ```
 
-Development mode with auto-reload:
+`PUBLIC_ORIGIN` must be the externally reachable HTTPS origin in production. Set `SESSION_SECRET` to a long, unique random value and keep SMTP credentials secret; never commit them. In production, the login cookie is marked `Secure`, so serve the app over HTTPS. Store `data/farm.db` on persistent storage and back it up.
 
-```bash
-npm run dev
-```
+## Email verification and login
+
+1. Visit `/signup.html` and submit an email plus a password (10–128 characters).
+2. Follow the emailed verification link within 30 minutes. The link verifies the address and redirects to `/login.html`.
+3. Sign in with the verified email and password. A signed, HttpOnly, SameSite=Lax cookie is issued for seven days.
+4. Dashboard HTML pages redirect unauthenticated users to login.
+
+SMTP is required to send verification links. If SMTP is not configured or delivery fails, the API reports an error; it never exposes verification tokens in the browser response. Registration responses avoid disclosing whether an email is already registered.
 
 ## API
 
-The backend exposes consumer APIs backed by SQLite.
+- `GET /api/health`
+- `POST /api/auth/register` — JSON `{ "email": "...", "password": "..." }`
+- `POST /api/auth/resend-verification` — JSON `{ "email": "..." }`
+- `GET /api/auth/verify?token=...` — verifies and redirects to login
+- `POST /api/auth/login` — JSON `{ "email": "...", "password": "..." }`
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- Existing consumer CRUD endpoints: `/api/consumers`
 
-| Method | Route | Description |
-| --- | --- | --- |
-| GET | /api/health | Health check |
-| GET | /api/consumers | List consumers |
-| GET | /api/consumers/:id | Fetch one consumer |
-| POST | /api/consumers | Create a consumer |
-| PUT | /api/consumers/:id | Update a consumer |
-| DELETE | /api/consumers/:id | Delete a consumer |
+Dashboard operational data in the existing pages is still stored in browser `localStorage`; authentication protects dashboard access but does not yet synchronize those records between users/devices.
 
-Example:
+## Deployment note
 
-```bash
-curl -X POST http://localhost:3000/api/consumers \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "Amina",
-    "phone": "+254700000000",
-    "buyerType": "Retail",
-    "eggsOrdered": 12,
-    "location": "Nairobi"
-  }'
-```
-
-## Storage
-
-The database file is created at:
-
-```text
-data/farm.db
-```
-
-Set `DATA_DIR` if you want to move the database storage directory.
-
-## Notes
-
-- The dashboard data in each HTML page still uses browser `localStorage` for the farm-specific charts and records.
-- This is a practical full-stack starter: persistent API storage is available, while page data remains client-side to keep the dashboard experience fast and self-contained.
+The account email-verification flow needs a Node.js host with a writable persistent database and reachable SMTP provider. Static-only hosting such as GitHub Pages cannot run the server or send verification mail.
