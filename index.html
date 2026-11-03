@@ -51,7 +51,9 @@
         <p class="mx-auto mt-6 max-w-2xl text-lg text-slate-300">
           Pick the dashboard that matches your poultry operation and track flock health, feed, sales, and production seamlessly.
         </p>
-        <p id="backend-status" class="mt-5 text-sm text-slate-400" role="status" aria-live="polite">Checking app service…</p>
+        <div class="mt-5 flex items-center justify-center gap-3 text-sm">
+          <span id="backend-status" class="text-slate-400" role="status" aria-live="polite">Checking app service…</span>
+        </div>
       </section>
 
       <section id="dashboards" class="mt-14 scroll-mt-8">
@@ -60,7 +62,7 @@
             <p class="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">Get started</p>
             <h2 class="mt-1 text-2xl font-bold text-white">Choose your dashboard</h2>
           </div>
-          <p class="text-sm text-slate-400">Each dashboard keeps its own local records in the browser.</p>
+          <p class="text-sm text-slate-400">Each dashboard keeps its own local records in the browser and can use the shared API layer.</p>
         </div>
 
         <div class="grid gap-5 md:grid-cols-3">
@@ -100,27 +102,28 @@
   </div>
 
   <script>
-    const backendStatus = document.getElementById('backend-status');
-    const health = window.FarmUI && window.FarmUI.checkBackendHealth ? window.FarmUI.checkBackendHealth() : null;
+    (function () {
+      const backendStatus = document.getElementById('backend-status');
+      if (!window.FarmUI) {
+        backendStatus.textContent = 'Service status unavailable.';
+        backendStatus.classList.add('text-amber-300');
+        return;
+      }
 
-    if (health) {
-      health.then((result) => {
+      window.FarmUI.checkBackendHealth().then((result) => {
         if (result) {
-          backendStatus.textContent = 'App service is online.';
+          backendStatus.textContent = 'API connected and ready.';
           backendStatus.classList.add('text-emerald-300');
           return;
         }
 
-        backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
+        backendStatus.textContent = 'Offline mode: browser storage active.';
         backendStatus.classList.add('text-amber-300');
       }).catch(() => {
-        backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
+        backendStatus.textContent = 'Offline mode: browser storage active.';
         backendStatus.classList.add('text-amber-300');
       });
-    } else {
-      backendStatus.textContent = 'Service status unavailable. You can still open the dashboard pages directly.';
-      backendStatus.classList.add('text-amber-300');
-    }
+    })();
   </script>
 </body>
 </html>

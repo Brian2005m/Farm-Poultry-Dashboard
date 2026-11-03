@@ -72,16 +72,17 @@
       const path = '/api/consumers';
       const requestMethod = method.toUpperCase();
 
-      const init = {
-        method: requestMethod,
-        body: JSON.stringify(payload)
-      };
-
       if (requestMethod === 'PUT' && payload && payload.id) {
-        return this.apiRequest(`${path}/${payload.id}`, init);
+        return this.apiRequest(`${path}/${payload.id}`, {
+          method: requestMethod,
+          body: JSON.stringify(payload)
+        });
       }
 
-      return this.apiRequest(path, init);
+      return this.apiRequest(path, {
+        method: requestMethod,
+        body: JSON.stringify(payload)
+      });
     }
   };
 

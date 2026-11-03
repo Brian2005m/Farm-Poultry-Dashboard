@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const cors = require('cors');
 const express = require('express');
 const fs = require('fs');
@@ -10,7 +11,8 @@ const DATA_DIR = process.env.DATA_DIR
   ? path.resolve(process.env.DATA_DIR)
   : path.join(__dirname, 'data');
 const DB_PATH = path.join(DATA_DIR, 'farm.db');
-let database = null;
+
+let dbPromise = null;
 
 const MAX_NAME_LENGTH = 120;
 const MAX_TEXT_LENGTH = 2000;
@@ -25,54 +27,8 @@ function ensureDataDir() {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function openDatabase() {
-  return new Promise((resolve, reject) => {
-    ensureDataDir();
-
-    const db = new sqlite3.Database(DB_PATH, (error) => {
-      if (error) {
-        return reject(makeHttpError(500, `Unable to open database: ${error.message}`));
-      }
-
-      db.serialize(() => {
-        db.run(
-          `CREATE TABLE IF NOT EXISTS consumers (
-            id TEXT PRIMARY KEY,
-            name TEXT NOT NULL,
-            phone TEXT NOT NULL,
-            email TEXT,
-            address TEXT,
-            buyerType TEXT,
-            eggsOrdered REAL DEFAULT 0,
-            location TEXT,
-            notes TEXT,
-            createdAt TEXT NOT NULL,
-            updatedAt TEXT NOT NULL
-          )`,
-          (createError) => {
-            if (createError) {
-              return reject(makeHttpError(500, `Database setup failed: ${createError.message}`));
-            }
-            return resolve(db);
-          }
-        );
-      });
-    });
-  });
-}
-
-async function getDatabase() {
-  if (database) return database;
-  database = await openDatabase();
-  return database;
-}
-
 function normalizeText(value, fieldName, options = {}) {
-  const {
-    required = false,
-    maxLength = MAX_TEXT_LENGTH,
-    defaultValue = ''
-  } = options;
+  const { required = false, maxLength = MAX_TEXT_LENGTH, defaultValue = '' } = options;
 
   if (value === undefined || value === null) {
     if (required) {
@@ -111,25 +67,13 @@ function normalizeConsumer(input = {}, existing = {}) {
     throw makeHttpError(400, 'eggsOrdered must be a non-negative number.');
   }
 
-  const name = normalizeText(input.name ?? existing.name, 'name', {
-    required: true,
-    maxLength: MAX_NAME_LENGTH
-  });
-
-  const phone = normalizeText(input.phone ?? existing.phone, 'phone', {
-    required: true,
-    maxLength: 40
-  });
-
   return {
-    id: existing.id || cryptoRandomId(),
-    name,
-    phone,
+    id: existing.id || crypto.randomUUID(),
+    name: normalizeText(input.name ?? existing.name, 'name', { required: true, maxLength: MAX_NAME_LENGTH }),
+    phone: normalizeText(input.phone ?? existing.phone, 'phone', { required: true, maxLength: 40 }),
     email: normalizeText(input.email ?? existing.email, 'email', { maxLength: 254 }),
     address: normalizeText(input.address ?? existing.address, 'address'),
-    buyerType: normalizeText(input.buyerType ?? existing.buyerType ?? 'Retail', 'buyerType', {
-      maxLength: 80
-    }) || 'Retail',
+    buyerType: normalizeText(input.buyerType ?? existing.buyerType ?? 'Retail', 'buyerType', { maxLength: 80 }) || 'Retail',
     eggsOrdered: eggsOrderedValue,
     location: normalizeText(input.location ?? existing.location, 'location', { maxLength: 120 }),
     notes: normalizeText(input.notes ?? existing.notes, 'notes'),
@@ -138,8 +82,45 @@ function normalizeConsumer(input = {}, existing = {}) {
   };
 }
 
-function cryptoRandomId() {
-  return 'consumer-' + Date.now() + '-' + Math.random().toString(16).slice(2, 8);
+function openDatabase() {
+  return new Promise((resolve, reject) => {
+    ensureDataDir();
+
+    const db = new sqlite3.Database(DB_PATH, (error) => {
+      if (error) {
+        return reject(makeHttpError(500, `Unable to open database: ${error.message}`));
+      }
+
+      db.run(
+        `CREATE TABLE IF NOT EXISTS consumers (
+          id TEXT PRIMARY KEY,
+          name TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          email TEXT,
+          address TEXT,
+          buyerType TEXT,
+          eggsOrdered REAL DEFAULT 0,
+          location TEXT,
+          notes TEXT,
+          createdAt TEXT NOT NULL,
+          updatedAt TEXT NOT NULL
+        )`,
+        (createError) => {
+          if (createError) {
+            return reject(makeHttpError(500, `Database setup failed: ${createError.message}`));
+          }
+          return resolve(db);
+        }
+      );
+    });
+  });
+}
+
+async function getDatabase() {
+  if (!dbPromise) {
+    dbPromise = openDatabase();
+  }
+  return dbPromise;
 }
 
 function runSql(db, sql, params = []) {
@@ -179,9 +160,10 @@ async function getConsumerById(id) {
   return getSql(db, 'SELECT * FROM consumers WHERE id = ?', [id]);
 }
 
-async function addConsumer(data) {
+async function addConsumer(input) {
+  const consumer = normalizeConsumer(input, {});
   const db = await getDatabase();
-  const consumer = normalizeConsumer(data, {});
+
   await runSql(
     db,
     `INSERT INTO consumers (
@@ -201,10 +183,11 @@ async function addConsumer(data) {
       consumer.updatedAt
     ]
   );
+
   return consumer;
 }
 
-async function updateConsumer(id, data) {
+async function updateConsumer(id, input) {
   const db = await getDatabase();
   const existing = await getConsumerById(id);
 
@@ -212,7 +195,8 @@ async function updateConsumer(id, data) {
     throw makeHttpError(404, 'Consumer not found.');
   }
 
-  const consumer = normalizeConsumer(data, existing);
+  const consumer = normalizeConsumer(input, existing);
+
   await runSql(
     db,
     `UPDATE consumers SET
@@ -238,9 +222,11 @@ async function updateConsumer(id, data) {
 async function deleteConsumer(id) {
   const db = await getDatabase();
   const result = await runSql(db, 'DELETE FROM consumers WHERE id = ?', [id]);
+
   if (result.changes === 0) {
     throw makeHttpError(404, 'Consumer not found.');
   }
+
   return { success: true };
 }
 
@@ -340,5 +326,4 @@ if (require.main === module) {
 }
 
 module.exports = { app, startServer, getDatabase };
-
 
