@@ -1,11 +1,14 @@
 {
   "name": "farm-poultry-dashboard-backend",
-  "version": "1.0.0",
-  "description": "Express backend for the Farm Poultry Dashboard",
+  "version": "1.1.0",
+  "description": "Farm Poultry Dashboard with a lightweight Express API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "dependencies": {
     "cors": "^2.8.5",
